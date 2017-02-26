@@ -6,6 +6,7 @@
 #define STATE_H
 #include <iomanip>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -15,6 +16,8 @@ private:
     char **board;                               // X, O, - (ASCII: 88, 79, 45)
 
 public:
+    typedef pair<char, int> action;
+
     state(int dimension = 8);                   // constructor
     state(char** fromBoard, int dimension = 8);
     state(const state &original);               // copy constructor
@@ -22,6 +25,7 @@ public:
     char** getBoard() const;                    // accessor for board
     int getDimension() const;                   // accessor for d
     bool makeMove(int r, int c, char typeChar); // success|failure
+    vector<action> getOrderedActions(char typeChar);
 
     friend std::ostream& operator<<(std::ostream&, const state&);
 };
@@ -78,6 +82,17 @@ int state::getDimension() const {
 bool state::makeMove(int r, int c, char typeChar) {
     return this->board[r-'A'][c-1] == '-' ? (this->board[r-'A'][c-1] = typeChar) : false;
 }
+
+// TODO XXX!!!!!
+vector<state::action> state::getOrderedActions(char typeChar) {
+    vector<state::action> actions;
+    // NOW WE HAVE TO FIND THE ORDER! _OR_ NOT!
+    // If we are 'O' return the minimum scoring (O winning) moves first
+    // If we are 'X' return the maximum scoring (X winning) moves first
+
+    return actions;
+}
+
 
 // friends
 ostream& operator<<(ostream& stream, const state& s) {
