@@ -27,6 +27,7 @@ public:
     friend std::ostream& operator<<(std::ostream&, const state&);
 };
 
+// default constructor
 state::state(int dimension) {
     this->d = dimension;
     this->board = new char *[this->d]; // structure
@@ -47,6 +48,7 @@ state::state(char** fromBoard, int dimension) : state(dimension) {
     }
 }
 
+// copy constructor
 state::state(const state &original) {
     this->d = original.getDimension();
     this->board = new char*[this->d];
@@ -57,6 +59,8 @@ state::state(const state &original) {
         }
     }
 }
+
+// destructor
 state::~state() {
     for (int i = 0; i < this->d; i++) {
         delete this->board[i];
@@ -71,6 +75,7 @@ int state::getDimension() const {
     return this->d;
 }
 
+// ternary move returns true if move was made, false otherwise... except in the off chance your typeChar is 0
 bool state::makeMove(int r, int c, char typeChar) {
     return this->board[r-'A'][c-1] == '-' ? (this->board[r-'A'][c-1] = typeChar) : false;
 }
@@ -89,7 +94,7 @@ ostream& operator<<(ostream& stream, const state& s) {
         for (int j = 0; j < dim; j++) {
             stream << setw(2) << s.getBoard()[i][j];
         }
-        cout << endl;
+        stream << endl;
     }
     return stream;
 }
