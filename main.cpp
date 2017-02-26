@@ -32,6 +32,8 @@ int main(int argc, char *argv[])
         action act = *validate(move, game, BOARD_SIZE);
         game->makeMove(act.first, act.second, 'X');
     }
+    A_B_SearchClass* a_b_searchClass = new A_B_SearchClass(game);
+
     cout << *game;
 
     return 0;

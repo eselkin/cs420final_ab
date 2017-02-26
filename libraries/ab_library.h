@@ -6,6 +6,14 @@
 #include <chrono>
 using namespace std;
 
+struct value {
+    value(double value, state* state_ptr){this->_value = value; this->_state = state_ptr;};
+    double _value;
+    state* _state;
+    friend bool operator <=(const value &a, const value &b) {return a._value <= b._value;}
+    friend bool operator >=(const value &a, const value &b) {return a._value >= b._value;}
+};
+
 class A_B_SearchClass {
 public:
     typedef pair<char, int> action;
@@ -15,54 +23,69 @@ public:
     chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
 
     // constructor
-    A_B_SearchClass(state* s, chrono::seconds timeLimit = chrono::seconds(30)) {
+    A_B_SearchClass(state* s, chrono::seconds timeLimit = chrono::seconds(30), char minchar = 'O', char maxchar = 'X') {
         this->timeLimit = timeLimit;
+        this->MIN_CHAR = minchar;
+        this->MAX_CHAR = maxchar;
         action bestAction = ab_search(s);
     }
 
-private :
-    // the actual search begins here!
-    action ab_search(state* s) {
-        this->startTime = std::chrono::high_resolution_clock::now(); // actually evaluate beginning time
-        double value = max_value(s, numeric_limits<double>::lowest(), numeric_limits<double>::max());
-        return *new action(); // TODO have to find a way to find the action related to the value returned!
+    value max(const value &a, const value &b) {
+        return a._value > b._value ? a : b;
+    }
+    value min(const value &a, const value &b) {
+        return a._value < b._value ? a : b;
     }
 
-    double max_value(state* s, double alpha, double beta) {
-        if(cutoff_test(s)) return eval(s);
-        double val = numeric_limits<double>::lowest();
-        for (action act : s->getOrderedActions('X')) {
-            state* nextMove =  new state(*s);
-            nextMove->makeMove(act.first, act.second, 'X'); // ignore the bool, shouldn't ever need that
-            val = max(val, min_value(nextMove, alpha, beta));
+private :
+    char MIN_CHAR, MAX_CHAR;
+    // the actual search begins here!
+    action ab_search(state* s) {
+        this->startTime = chrono::high_resolution_clock::now(); // actually evaluate beginning time
+        int depth = 1;
+        value alpha(numeric_limits<double>::lowest(), nullptr);
+        value beta(numeric_limits<double>::max(), nullptr);
+        value val = max_value(s, alpha, beta, depth);
+        return val._state->getActionTakenToGetHere();
+    }
+
+    value max_value(state* s, value alpha, value beta, int& depth) {
+        if(cutoff_test(s, depth)) return eval(s);
+        value val(numeric_limits<double>::lowest(), s);
+        // This is an action even though it's a state b/c we've taken the action to get to the successor
+        for (state* successor : s->getOrderedSuccessors(MAX_CHAR)) {
+            val = max(val, min_value(successor, alpha, beta, depth));
             if (val >= beta) return val;
             alpha = max(alpha, val);
         }
         return val;
     }
 
-    double min_value(state* s, double alpha, double beta) {
-        if (cutoff_test(s)) return eval(s);
-        double val = numeric_limits<double>::max();
-        for (action act: s->getOrderedActions('O')) {
-            state* nextMove = new state(*s);
-            nextMove->makeMove(act.first, act.second, 'O');
-            val = min(val, max_value(nextMove, alpha, beta));
+    value min_value(state* s, value alpha, value beta, int& depth) {
+        depth++; // turn depth not ply depth
+        if (cutoff_test(s, depth)) return eval(s);
+        value val(numeric_limits<double>::max(), s);
+        for (state* successor : s->getOrderedSuccessors(MIN_CHAR)) {
+            val = min(val, max_value(successor, alpha, beta, depth));
             if (val <= alpha) return val;
             beta = min(beta, val);
         }
         return val;
     }
 
-    bool cutoff_test(state* s) {
+    bool cutoff_test(state* s, int depth) {
+        // I don't think we need depth, what we need is whether there are moves available
         auto testTime = std::chrono::high_resolution_clock::now();
         auto timeDifference = std::chrono::duration_cast<std::chrono::seconds>(testTime - this->startTime);
         return timeDifference >= this->timeLimit;
     }
 
-    double eval(state* s) {
-        // THE TRICKY FUNCTION! TODO XXX
-        return 0;
+    value eval(state* s) {
+        return value(getValueOfState(s), s);
+    }
+
+    double getValueOfState(state* s) {
+        // THE TRICKY FUNCTION! TODO XXX HAS TO BE FAST AND SHOULD PROBABLY BE A PROBABILITY 0.000-1.000
     }
 };
 #endif // AB_LIBRARY_H

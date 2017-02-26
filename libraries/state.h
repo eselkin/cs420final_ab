@@ -9,14 +9,17 @@
 #include <vector>
 
 using namespace std;
+typedef pair<char, int> action;
 
 class state {
 private:
     int d;                                      // board dimension
     char **board;                               // X, O, - (ASCII: 88, 79, 45)
+    action takenToGetHere;                      // No need to keep track of parent just the move so the parent knows
+    state* parent;
+    vector<state*>* successors;                 // Ordered list of successors TODO Not sure if we need this I think we should have to generate this every time we come to a state
 
 public:
-    typedef pair<char, int> action;
 
     state(int dimension = 8);                   // constructor
     state(char** fromBoard, int dimension = 8);
@@ -25,7 +28,8 @@ public:
     char** getBoard() const;                    // accessor for board
     int getDimension() const;                   // accessor for d
     bool makeMove(int r, int c, char typeChar); // success|failure
-    vector<action> getOrderedActions(char typeChar);
+    action getActionTakenToGetHere();
+    vector<state*> getOrderedSuccessors(char typeChar);
 
     friend std::ostream& operator<<(std::ostream&, const state&);
 };
@@ -80,17 +84,31 @@ int state::getDimension() const {
 
 // ternary move returns true if move was made, false otherwise... except in the off chance your typeChar is 0
 bool state::makeMove(int r, int c, char typeChar) {
+    this->takenToGetHere = action(char(r+'A'), c);
     return this->board[r-'A'][c-1] == '-' ? (this->board[r-'A'][c-1] = typeChar) : false;
 }
 
 // TODO XXX!!!!!
-vector<state::action> state::getOrderedActions(char typeChar) {
-    vector<state::action> actions;
-    // NOW WE HAVE TO FIND THE ORDER! _OR_ NOT!
-    // If we are 'O' return the minimum scoring (O winning) moves first
-    // If we are 'X' return the maximum scoring (X winning) moves first
+vector<state*> state::getOrderedSuccessors(char typeChar) {
+    if (this->successors == nullptr) {
+        this->successors = new vector<state*>();
+        // NOW WE HAVE TO FIND THE ORDER! _OR_ NOT!
+        if (typeChar == 'X') {
+            // priority Killer Moves for X
+            // priority Block O
+            // priority longer chains
+            // when we make a state here set parent to this state
+            // then remember to successor->makeMove()
 
-    return actions;
+        } else {
+            // opposite of above
+        }
+    }
+    return *this->successors;
+}
+
+action state::getActionTakenToGetHere() {
+    return this->takenToGetHere;
 }
 
 
@@ -112,4 +130,6 @@ ostream& operator<<(ostream& stream, const state& s) {
     }
     return stream;
 }
+
+
 #endif // STATE_H
