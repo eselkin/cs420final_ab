@@ -18,6 +18,8 @@ int main(int argc, char *argv[])
     }
     state* test1 = new state(testConstructor, dim); // uses state(int)
     cout << *test1 << endl << endl;
+    cout << test1->makeMove('B', 2, 'O') << endl << endl;
+    cout << test1->makeMove('B', 2, 'X') << endl << endl;
 
     state* test2 = new state(*test1);
     cout << *test2;

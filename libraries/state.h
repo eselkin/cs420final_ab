@@ -71,6 +71,10 @@ int state::getDimension() const {
     return this->d;
 }
 
+bool state::makeMove(int r, int c, char typeChar) {
+    return this->board[r-'A'][c-1] == '-' ? (this->board[r-'A'][c-1] = typeChar) : false;
+}
+
 // friends
 ostream& operator<<(ostream& stream, const state& s) {
     // pretty print?
