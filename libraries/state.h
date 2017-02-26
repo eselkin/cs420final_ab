@@ -4,7 +4,6 @@
  */
 #ifndef STATE_H
 #define STATE_H
-
 #include <iomanip>
 #include <iostream>
 
@@ -98,5 +97,4 @@ ostream& operator<<(ostream& stream, const state& s) {
     }
     return stream;
 }
-
 #endif // STATE_H
