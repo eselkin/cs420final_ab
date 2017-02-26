@@ -4,6 +4,7 @@
 #include "state.h"
 
 using namespace std;
+
 void test_state(int dim) {
     char** testConstructor = new char* [dim];
     for (int i = 0; i < dim; i++){

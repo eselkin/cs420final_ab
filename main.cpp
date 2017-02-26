@@ -4,8 +4,6 @@
 #include "libraries/timing_library.h"
 #include "libraries/testing_library.h"
 
-void test_state(int);
-
 using namespace std;
 
 int main(int argc, char *argv[])
