@@ -4,9 +4,7 @@
 #include "libraries/ab_library.h"
 #include "libraries/timing_library.h"
 #include "libraries/testing_library.h"
-
-template <typename T>
-void prompt(string dialog, T& outputTo);
+#include "libraries/extras_library.h"
 
 using namespace std;
 
@@ -17,21 +15,12 @@ int main(int argc, char *argv[])
     int timeLimit;
     bool humanFirst;
     prompt("Time limit for a computer move is? ", timeLimit);
+    prompt("Human first? " , humanFirst);
+
     cout << "Time limit for computer is: " << timeLimit << " seconds" << endl;
-    prompt("Human first?" , humanFirst);
     cout << "Human will go " <<  (humanFirst ? "first" : "second") << endl;
+
+    cout << *game;
     return 0;
 }
 
-template <typename T>
-void prompt(string dialog, T& outputTo) {
-    string input;
-    cout << dialog;
-    getline(cin, input);
-    if (typeid(T) == typeid(bool)) {
-        outputTo = input[0] == 'Y' || input[0] == 'y';
-    } else {
-        stringstream ss(input);
-        ss >> outputTo;
-    }
-}

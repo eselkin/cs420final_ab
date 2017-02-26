@@ -1,5 +1,5 @@
-#ifndef CS420FINAL_AB_TESTING_LIBRARY_H
-#define CS420FINAL_AB_TESTING_LIBRARY_H
+#ifndef TESTING_LIBRARY_H
+#define TESTING_LIBRARY_H
 #include <iostream>
 #include "state.h"
 
@@ -25,4 +25,4 @@ void test_state(int dim) {
     delete test2;
 }
 
-#endif //CS420FINAL_AB_TESTING_LIBRARY_H
+#endif //TESTING_LIBRARY_H
