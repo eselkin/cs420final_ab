@@ -25,7 +25,7 @@ private :
     action ab_search(state* s) {
         this->startTime = std::chrono::high_resolution_clock::now(); // actually evaluate beginning time
         double value = max_value(s, numeric_limits<double>::lowest(), numeric_limits<double>::max());
-        return *new action();
+        return *new action(); // TODO have to find a way to find the action related to the value returned!
     }
 
     double max_value(state* s, double alpha, double beta) {
