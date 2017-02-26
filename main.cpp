@@ -24,5 +24,8 @@ int main(int argc, char *argv[])
     state* test2 = new state(*test1);
     cout << *test2;
 
+    delete test1;
+    delete test2;
+
     return 0;
 }
