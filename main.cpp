@@ -29,7 +29,7 @@ void prompt(string dialog, T& outputTo) {
     cout << dialog;
     getline(cin, input);
     if (typeid(T) == typeid(bool)) {
-        outputTo = input[0] == 'Y' || input == 'y';
+        outputTo = input[0] == 'Y' || input[0] == 'y';
     } else {
         stringstream ss(input);
         ss >> outputTo;
