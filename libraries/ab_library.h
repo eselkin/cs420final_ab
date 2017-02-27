@@ -25,7 +25,7 @@ public:
     // constructor
     A_B_SearchClass(state* s, chrono::seconds timeLimit = chrono::seconds(30), char minchar = 'O', char maxchar = 'X') {
         this->timeLimit = timeLimit;
-        this->MIN_CHAR = minchar;
+        this->MIN_CHAR = minchar; // this way we don't need to switch around the formula whichever user goes first
         this->MAX_CHAR = maxchar;
         action bestAction = ab_search(s);
     }
