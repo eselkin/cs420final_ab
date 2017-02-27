@@ -39,13 +39,19 @@ public:
 
 private :
     char MIN_CHAR, MAX_CHAR;
+    int MAX_DEPTH;
     // the actual search begins here!
     action ab_search(state* s) {
         this->startTime = chrono::high_resolution_clock::now(); // actually evaluate beginning time
-        int depth = 1;
-        value alpha(numeric_limits<double>::lowest(), nullptr);
-        value beta(numeric_limits<double>::max(), nullptr);
-        value val = max_value(s, alpha, beta, depth);
+        this->MAX_DEPTH = 1;
+        value val(0.0, nullptr);
+        while(MAX_DEPTH < 100) {
+            int depth = 1;
+            value alpha(numeric_limits<double>::lowest(), nullptr);
+            value beta(numeric_limits<double>::max(), nullptr);
+            val = max_value(s, alpha, beta, depth);
+            MAX_DEPTH++;
+        }
         return val._state->getActionTakenToGetHere();
     }
 
@@ -74,7 +80,8 @@ private :
     }
 
     bool cutoff_test(state* s, int depth) {
-        // I don't think we need depth, what we need is whether there are moves available
+        if (depth > MAX_DEPTH)
+            return true;
         auto testTime = std::chrono::high_resolution_clock::now();
         auto timeDifference = std::chrono::duration_cast<std::chrono::seconds>(testTime - this->startTime);
         return timeDifference >= this->timeLimit;
