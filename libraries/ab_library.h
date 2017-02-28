@@ -29,6 +29,7 @@ public:
         this->MAX_CHAR = maxchar;
         this->orderOfSuccession = orderOfSuccession;
         action bestAction = ab_search(s);
+        s->makeMove(bestAction.first, bestAction.second, maxchar);
     }
 
     value max(const value &a, const value &b) {
@@ -66,10 +67,12 @@ private :
         if (cutoff_test(s, depth)) return eval(s);
         value val(numeric_limits<double>::lowest(), s);
         // This is an action even though it's a state b/c we've taken the action to get to the successor
-        for (state *successor : s->getOrderedSuccessors(MAX_CHAR, orderOfSuccession)) {
-            val = max(val, min_value(successor, alpha, beta, depth));
-            if (val >= beta) return val;
-            alpha = max(alpha, val);
+        if (s != NULL) {
+            for (state *successor : s->getOrderedSuccessors(MAX_CHAR, orderOfSuccession)) {
+                val = max(val, min_value(successor, alpha, beta, depth));
+                if (val >= beta) return val;
+                alpha = max(alpha, val);
+            }
         }
         return val;
     }
@@ -78,10 +81,12 @@ private :
         depth++; // turn depth not ply depth
         if (cutoff_test(s, depth)) return eval(s);
         value val(numeric_limits<double>::max(), s);
-        for (state *successor : s->getOrderedSuccessors(MIN_CHAR, orderOfSuccession)) {
-            val = min(val, max_value(successor, alpha, beta, depth));
-            if (val <= alpha) return val;
-            beta = min(beta, val);
+        if (s != NULL) {
+            for (state *successor : s->getOrderedSuccessors(MIN_CHAR, orderOfSuccession)) {
+                val = min(val, max_value(successor, alpha, beta, depth));
+                if (val <= alpha) return val;
+                beta = min(beta, val);
+            }
         }
         return val;
     }

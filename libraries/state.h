@@ -86,7 +86,7 @@ int state::getDimension() const {
 
 // ternary move returns true if move was made, false otherwise... except in the off chance your typeChar is 0
 bool state::makeMove(char r, int c, char typeChar) {
-    this->takenToGetHere = action(char(r+'A'), c);
+    this->takenToGetHere = action(r, c);
     return this->board[r-'A'][c-1] == '-' ? (this->board[r-'A'][c-1] = typeChar) : false;
 }
 
@@ -97,69 +97,67 @@ string state::getStringFromRow(char* row){
 // TODO XXX!!!!!
 vector<state*> state::getOrderedSuccessors(char typeChar, vector<regex>* orderOfSuccession) {
     char altChar = typeChar == 'X' ? 'O' : 'X';
-    if (this->successors == nullptr) {
-        this->successors = new vector<state *>();
-        char **transpose_board = new char*[d];
-        for (int i = 0; i < d; i++)
-            transpose_board[i] = new char[d];
-        for (int i = 0; i < d; i++) {
-            for (int j = 0; j < d; j++) {
-                transpose_board[j][i] = this->board[i][j];
-            }
+    this->successors = new vector<state *>();
+    char **transpose_board = new char *[d];
+    for (int i = 0; i < d; i++)
+        transpose_board[i] = new char[d];
+    for (int i = 0; i < d; i++) {
+        for (int j = 0; j < d; j++) {
+            transpose_board[j][i] = this->board[i][j];
         }
-        smatch matcher;
-        if (typeChar == 'X') {
-            // priority Block O
-            // priority longer chains
-            // when we make a state here set parent to this state
-            // then remember to successor->makeMove()
+    }
+    smatch matcher;
+    if (typeChar == 'X') {
+        // priority Block O
+        // priority longer chains
+        // when we make a state here set parent to this state
+        // then remember to successor->makeMove()
 
-        } else {
-            swap(orderOfSuccession[0], orderOfSuccession[1]);
-            swap(orderOfSuccession[2], orderOfSuccession[3]);
-            swap(orderOfSuccession[4], orderOfSuccession[5]);
-            // opposite of above
-        }
-        for (regex expression : *orderOfSuccession) {
-            for (int i = 0; i < d; i++) {
-                string transposeRow = getStringFromRow(transpose_board[i]);
-                string row = getStringFromRow(this->board[i]);
-                string rowTemp(row);
-                while (regex_search(rowTemp, matcher, expression)) {
-                    int pos;
-                    if (matcher[1].length() == 0) {
-                        pos = (int)matcher.prefix().length() + (int)matcher[0].length() - 1;
-                    } else {
-                        pos = (int)matcher.prefix().length();
-                    }
-                    state *successor_state = new state(this->board, this->d);
-                    successor_state->makeMove(i + 'A', pos, typeChar);
-                    this->successors->push_back(successor_state);
-                    rowTemp = matcher.suffix().str();
+    } else {
+        swap((*orderOfSuccession)[0], (*orderOfSuccession)[1]);
+        swap((*orderOfSuccession)[2], (*orderOfSuccession)[3]);
+        swap((*orderOfSuccession)[4], (*orderOfSuccession)[5]);
+        // opposite of above
+    }
+    for (regex expression : *orderOfSuccession) {
+        for (int i = 0; i < d; i++) {
+            string transposeRow = getStringFromRow(transpose_board[i]);
+            string row = getStringFromRow(this->board[i]);
+            string rowTemp(row);
+            while (regex_search(rowTemp, matcher, expression)) {
+                int pos;
+                if (matcher[1].length() == 0) {
+                    pos = (int) matcher.prefix().length() + (int) matcher[0].length() - 1;
+                } else {
+                    pos = (int) matcher.prefix().length();
                 }
-                rowTemp = transposeRow;
-                while (regex_search(rowTemp, matcher, expression)) {
-                    int pos;
-                    if (matcher[1].length() == 0) {
-                        pos = (int)matcher.prefix().length() + (int)matcher[0].length() - 1;
-                    } else {
-                        pos = (int)matcher.prefix().length();
-                    }
-                    // this means a column i has a killer move and row pos
-                    state *successor_state = new state(this->board, this->d);
-                    successor_state->makeMove((char) (pos + 'A'), i, typeChar);
-                    this->successors->push_back(successor_state);
-                    rowTemp = matcher.suffix().str();
+                state *successor_state = new state(this->board, this->d);
+                successor_state->makeMove((char)(i + 'A'), pos, typeChar);
+                (this->successors)->push_back(successor_state);
+                rowTemp = matcher.suffix().str();
+            }
+            rowTemp = transposeRow;
+            while (regex_search(rowTemp, matcher, expression)) {
+                int pos;
+                if (matcher[1].length() == 0) {
+                    pos = (int) matcher.prefix().length() + (int) matcher[0].length() - 1;
+                } else {
+                    pos = (int) matcher.prefix().length();
                 }
+                // this means a column i has a killer move and row pos
+                state *successor_state = new state(this->board, this->d);
+                successor_state->makeMove((char) (pos + 'A'), i, typeChar);
+                (this->successors)->push_back(successor_state);
+                rowTemp = matcher.suffix().str();
             }
         }
     }
     if (this->successors->size() == 0) { // if there was nothing else on the board then push back a random
         state *random_successor = new state(this->board, this->d);
         while (!random_successor->makeMove((char) (rand() % this->d), rand() % this->d, typeChar));
-        this->successors->push_back(random_successor);
+        (this->successors)->push_back(random_successor);
     }
-    return *this->successors;
+    return *(this->successors);
 }
 
 action state::getActionTakenToGetHere() {
