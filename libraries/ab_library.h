@@ -23,10 +23,11 @@ public:
     chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
 
     // constructor
-    A_B_SearchClass(state* s, chrono::seconds timeLimit = chrono::seconds(30), char minchar = 'O', char maxchar = 'X') {
+    A_B_SearchClass(state* s, vector<regex>* orderOfSuccession, chrono::seconds timeLimit = chrono::seconds(30), char minchar = 'O', char maxchar = 'X') {
         this->timeLimit = timeLimit;
         this->MIN_CHAR = minchar; // this way we don't need to switch around the formula whichever user goes first
         this->MAX_CHAR = maxchar;
+        this->orderOfSuccession = orderOfSuccession;
         action bestAction = ab_search(s);
     }
 
@@ -40,26 +41,32 @@ public:
 private :
     char MIN_CHAR, MAX_CHAR;
     int MAX_DEPTH;
+    vector<regex>* orderOfSuccession;
     // the actual search begins here!
     action ab_search(state* s) {
         this->startTime = chrono::high_resolution_clock::now(); // actually evaluate beginning time
         this->MAX_DEPTH = 1;
         value val(0.0, nullptr);
-        while(MAX_DEPTH < 100) {
+        chrono::microseconds cycle_duration = chrono::microseconds(0);
+        chrono::microseconds total_duration = chrono::microseconds(0);
+        while(MAX_DEPTH < 100 && (total_duration + cycle_duration < timeLimit)) {
             int depth = 1;
+            total_duration += cycle_duration;
+            auto cycle_time = chrono::high_resolution_clock::now(); // actually evaluate beginning time
             value alpha(numeric_limits<double>::lowest(), nullptr);
             value beta(numeric_limits<double>::max(), nullptr);
             val = max_value(s, alpha, beta, depth);
+            cycle_duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now()-cycle_time);
             MAX_DEPTH++;
         }
         return val._state->getActionTakenToGetHere();
     }
 
     value max_value(state* s, value alpha, value beta, int& depth) {
-        if(cutoff_test(s, depth)) return eval(s);
+        if (cutoff_test(s, depth)) return eval(s);
         value val(numeric_limits<double>::lowest(), s);
         // This is an action even though it's a state b/c we've taken the action to get to the successor
-        for (state* successor : s->getOrderedSuccessors(MAX_CHAR)) {
+        for (state *successor : s->getOrderedSuccessors(MAX_CHAR, orderOfSuccession)) {
             val = max(val, min_value(successor, alpha, beta, depth));
             if (val >= beta) return val;
             alpha = max(alpha, val);
@@ -71,7 +78,7 @@ private :
         depth++; // turn depth not ply depth
         if (cutoff_test(s, depth)) return eval(s);
         value val(numeric_limits<double>::max(), s);
-        for (state* successor : s->getOrderedSuccessors(MIN_CHAR)) {
+        for (state *successor : s->getOrderedSuccessors(MIN_CHAR, orderOfSuccession)) {
             val = min(val, max_value(successor, alpha, beta, depth));
             if (val <= alpha) return val;
             beta = min(beta, val);
@@ -93,6 +100,8 @@ private :
 
     double getValueOfState(state* s) {
         // THE TRICKY FUNCTION! TODO XXX HAS TO BE FAST AND SHOULD PROBABLY BE A PROBABILITY 0.000-1.000
+        // similar to getOrderedValues or maybe that will hold the values!
+        return 0.0;
     }
 };
 #endif // AB_LIBRARY_H
