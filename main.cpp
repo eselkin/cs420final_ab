@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
         typeChar = 'O';
         altChar = 'X';
     }
+    cout << " typechar: " << typeChar << endl << endl;
     stringstream conv;
     conv << "(-)(?:" << typeChar << typeChar << typeChar << ")|(?:"<< typeChar << typeChar << typeChar << ")(-)";
     orderOfSuccession->push_back(regex(conv.str())); // win
@@ -68,7 +69,7 @@ int main(int argc, char *argv[])
     game->makeMove('C', 5, 'X');
     game->makeMove('D', 5, 'X');
     game->makeMove('E', 1, 'X');
-    A_B_SearchClass* a_b_searchClass = new A_B_SearchClass(game, orderOfSuccession);
+    A_B_SearchClass* a_b_searchClass = new A_B_SearchClass(game, orderOfSuccession, chrono::seconds(timeLimit), altChar, typeChar);
 
     cout << *game;
 

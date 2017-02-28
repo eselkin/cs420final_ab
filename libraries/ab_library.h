@@ -17,7 +17,7 @@ struct value {
 class A_B_SearchClass {
 public:
     typedef pair<char, int> action;
-
+    regex *win, *loss, *tie;
     // cutoff
     chrono::seconds timeLimit = std::chrono::seconds(30);
     chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
@@ -30,6 +30,8 @@ public:
         this->orderOfSuccession = orderOfSuccession;
         action bestAction = ab_search(s);
         s->makeMove(bestAction.first, bestAction.second, maxchar);
+        win = new regex(string({maxchar, maxchar, maxchar, maxchar}));
+        loss = new regex(string({minchar, minchar, minchar, minchar}));
     }
 
     value max(const value &a, const value &b) {
@@ -68,7 +70,7 @@ private :
         value val(numeric_limits<double>::lowest(), s);
         // This is an action even though it's a state b/c we've taken the action to get to the successor
         if (s != NULL) {
-            for (state *successor : s->getOrderedSuccessors(MAX_CHAR, orderOfSuccession)) {
+            for (state *successor : s->getOrderedSuccessors(MAX_CHAR, *orderOfSuccession)) {
                 val = max(val, min_value(successor, alpha, beta, depth));
                 if (val >= beta) return val;
                 alpha = max(alpha, val);
@@ -82,7 +84,7 @@ private :
         if (cutoff_test(s, depth)) return eval(s);
         value val(numeric_limits<double>::max(), s);
         if (s != NULL) {
-            for (state *successor : s->getOrderedSuccessors(MIN_CHAR, orderOfSuccession)) {
+            for (state *successor : s->getOrderedSuccessors(MIN_CHAR, *orderOfSuccession)) {
                 val = min(val, max_value(successor, alpha, beta, depth));
                 if (val <= alpha) return val;
                 beta = min(beta, val);
@@ -100,13 +102,7 @@ private :
     }
 
     value eval(state* s) {
-        return value(getValueOfState(s), s);
-    }
-
-    double getValueOfState(state* s) {
-        // THE TRICKY FUNCTION! TODO XXX HAS TO BE FAST AND SHOULD PROBABLY BE A PROBABILITY 0.000-1.000
-        // similar to getOrderedValues or maybe that will hold the values!
-        return 0.0;
+        return value(s->getValue(), s);
     }
 };
 #endif // AB_LIBRARY_H

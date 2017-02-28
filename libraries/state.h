@@ -16,6 +16,7 @@ class state {
 private:
     int d;                                      // board dimension
     char **board;                               // X, O, - (ASCII: 88, 79, 45)
+    double value;                               // why calculate these things twice?
     action takenToGetHere;                      // No need to keep track of parent just the move so the parent knows
     state* parent;
     vector<state*>* successors;                 // Ordered list of successors TODO Not sure if we need this I think we should have to generate this every time we come to a state
@@ -28,9 +29,11 @@ public:
     ~state();                                   // destructor
     char** getBoard() const;                    // accessor for board
     int getDimension() const;                   // accessor for d
+    double getValue() const;
+    void setValue(double value);
     bool makeMove(char r, int c, char typeChar);// success|failure
     action getActionTakenToGetHere();
-    vector<state*> getOrderedSuccessors(char typeChar, vector<regex>* orderOfSuccession);
+    vector<state*> getOrderedSuccessors(char typeChar, vector<regex> orderOfSuccession);
 
     friend std::ostream& operator<<(std::ostream&, const state&);
     string getStringFromRow(char *row);
@@ -95,7 +98,7 @@ string state::getStringFromRow(char* row){
 }
 
 // TODO XXX!!!!!
-vector<state*> state::getOrderedSuccessors(char typeChar, vector<regex>* orderOfSuccession) {
+vector<state*> state::getOrderedSuccessors(char typeChar, vector<regex> orderOfSuccession) {
     char altChar = typeChar == 'X' ? 'O' : 'X';
     this->successors = new vector<state *>();
     char **transpose_board = new char *[d];
@@ -107,19 +110,12 @@ vector<state*> state::getOrderedSuccessors(char typeChar, vector<regex>* orderOf
         }
     }
     smatch matcher;
-    if (typeChar == 'X') {
-        // priority Block O
-        // priority longer chains
-        // when we make a state here set parent to this state
-        // then remember to successor->makeMove()
-
-    } else {
-        swap((*orderOfSuccession)[0], (*orderOfSuccession)[1]);
-        swap((*orderOfSuccession)[2], (*orderOfSuccession)[3]);
-        swap((*orderOfSuccession)[4], (*orderOfSuccession)[5]);
-        // opposite of above
+    if (typeChar != 'X'){
+        swap(orderOfSuccession[0], orderOfSuccession[1]);
+        swap(orderOfSuccession[2], orderOfSuccession[3]);
+        swap(orderOfSuccession[4], orderOfSuccession[5]);
     }
-    for (regex expression : *orderOfSuccession) {
+    for (regex expression : orderOfSuccession) {
         for (int i = 0; i < d; i++) {
             string transposeRow = getStringFromRow(transpose_board[i]);
             string row = getStringFromRow(this->board[i]);
@@ -133,6 +129,22 @@ vector<state*> state::getOrderedSuccessors(char typeChar, vector<regex>* orderOf
                 }
                 state *successor_state = new state(this->board, this->d);
                 successor_state->makeMove((char)(i + 'A'), pos, typeChar);
+                if (matcher[0].length() == 4) {
+                    if (typeChar == 'X')
+                        successor_state->setValue(1.0);
+                    else
+                        successor_state->setValue(-1.0);
+                } else if (matcher[0].length() == 3) {
+                    if (typeChar == 'X')
+                        successor_state->setValue(0.75);
+                    else
+                        successor_state->setValue(-0.75);
+                } else if (matcher[0].length() == 2) {
+                    if (typeChar == 'X')
+                        successor_state->setValue(0.5);
+                    else
+                        successor_state->setValue(-0.5);
+                }
                 (this->successors)->push_back(successor_state);
                 rowTemp = matcher.suffix().str();
             }
@@ -147,6 +159,22 @@ vector<state*> state::getOrderedSuccessors(char typeChar, vector<regex>* orderOf
                 // this means a column i has a killer move and row pos
                 state *successor_state = new state(this->board, this->d);
                 successor_state->makeMove((char) (pos + 'A'), i, typeChar);
+                if (matcher[0].length() == 4) {
+                    if (typeChar == 'X')
+                        successor_state->setValue(1.0);
+                    else
+                        successor_state->setValue(-1.0);
+                } else if (matcher[0].length() == 3) {
+                    if (typeChar == 'X')
+                        successor_state->setValue(0.75);
+                    else
+                        successor_state->setValue(-0.75);
+                } else if (matcher[0].length() == 2) {
+                    if (typeChar == 'X')
+                        successor_state->setValue(0.5);
+                    else
+                        successor_state->setValue(-0.5);
+                }
                 (this->successors)->push_back(successor_state);
                 rowTemp = matcher.suffix().str();
             }
@@ -155,6 +183,10 @@ vector<state*> state::getOrderedSuccessors(char typeChar, vector<regex>* orderOf
     if (this->successors->size() == 0) { // if there was nothing else on the board then push back a random
         state *random_successor = new state(this->board, this->d);
         while (!random_successor->makeMove((char) (rand() % this->d), rand() % this->d, typeChar));
+        if (typeChar == 'X')
+            random_successor->setValue(0.25);
+        else
+            random_successor->setValue(-0.25);
         (this->successors)->push_back(random_successor);
     }
     return *(this->successors);
@@ -182,6 +214,14 @@ ostream& operator<<(ostream& stream, const state& s) {
         stream << endl;
     }
     return stream;
+}
+
+double state::getValue() const {
+    return this->value;
+}
+
+void state::setValue(double value) {
+    this->value = value;
 }
 
 
