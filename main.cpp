@@ -12,7 +12,7 @@ typedef pair<char, int> action;
 
 int main(int argc, char *argv[])
 {
-    test_state(BOARD_SIZE);
+    //test_state(BOARD_SIZE);
     state *game = new state();
     int timeLimit;
     bool humanFirst;

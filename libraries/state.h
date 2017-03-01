@@ -33,7 +33,7 @@ public:
     void setValue(double value);
     bool makeMove(char r, int c, char typeChar);// success|failure
     action getActionTakenToGetHere();
-    vector<state*> getOrderedSuccessors(char typeChar, vector<regex> orderOfSuccession);
+    vector<state*>& getOrderedSuccessors(char typeChar, vector<regex> orderOfSuccession);
 
     friend std::ostream& operator<<(std::ostream&, const state&);
     string getStringFromRow(char *row);
@@ -98,7 +98,7 @@ string state::getStringFromRow(char* row){
 }
 
 // TODO XXX!!!!!
-vector<state*> state::getOrderedSuccessors(char typeChar, vector<regex> orderOfSuccession) {
+vector<state*>& state::getOrderedSuccessors(char typeChar, vector<regex> orderOfSuccession) {
     char altChar = typeChar == 'X' ? 'O' : 'X';
     this->successors = new vector<state *>();
     char **transpose_board = new char *[d];
@@ -108,6 +108,9 @@ vector<state*> state::getOrderedSuccessors(char typeChar, vector<regex> orderOfS
         for (int j = 0; j < d; j++) {
             transpose_board[j][i] = this->board[i][j];
         }
+    }
+    for (int i = 0; i < d; i++) {
+        cout << transpose_board[i] << endl;
     }
     smatch matcher;
     if (typeChar != 'X'){
@@ -123,12 +126,15 @@ vector<state*> state::getOrderedSuccessors(char typeChar, vector<regex> orderOfS
             while (regex_search(rowTemp, matcher, expression)) {
                 int pos;
                 if (matcher[1].length() == 0) {
-                    pos = (int) matcher.prefix().length() + (int) matcher[0].length() - 1;
+                    pos = (int) matcher.prefix().length() + (int) matcher[0].length();
                 } else {
                     pos = (int) matcher.prefix().length();
                 }
                 state *successor_state = new state(this->board, this->d);
                 successor_state->makeMove((char)(i + 'A'), pos, typeChar);
+                cout << "made move... row: " << char(i + 'A') << " col: " << pos << " char: "<< typeChar << endl;
+                cout << successor_state->getActionTakenToGetHere().first << " + " << successor_state->getActionTakenToGetHere().second << endl;
+                cout << "curr row: " << char(i+'A') << " is: " << rowTemp << endl;
                 if (matcher[0].length() == 4) {
                     if (typeChar == 'X')
                         successor_state->setValue(1.0);
@@ -158,7 +164,9 @@ vector<state*> state::getOrderedSuccessors(char typeChar, vector<regex> orderOfS
                 }
                 // this means a column i has a killer move and row pos
                 state *successor_state = new state(this->board, this->d);
-                successor_state->makeMove((char) (pos + 'A'), i, typeChar);
+                successor_state->makeMove((char) (pos + 'A'), i+1, typeChar);
+                cout << "curr col: " << i+1 << " is: " << rowTemp << endl;
+                cout <<  "2 made move... row: " << char(pos + 'A') << " col: " << i << "type: " << typeChar << endl;
                 if (matcher[0].length() == 4) {
                     if (typeChar == 'X')
                         successor_state->setValue(1.0);
@@ -201,7 +209,6 @@ action state::getActionTakenToGetHere() {
 ostream& operator<<(ostream& stream, const state& s) {
     // pretty print?
     int dim = s.getDimension();
-    int A = 'A';
     stream << setw(3) << " ";
     for (int i = 0; i < dim; i++)
         stream << setw(2) << i+1;

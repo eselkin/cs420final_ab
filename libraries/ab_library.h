@@ -52,7 +52,7 @@ private :
         value val(0.0, nullptr);
         chrono::microseconds cycle_duration = chrono::microseconds(0);
         chrono::microseconds total_duration = chrono::microseconds(0);
-        while(MAX_DEPTH < 100 && (total_duration + cycle_duration < timeLimit)) {
+        while(MAX_DEPTH < 10 && (total_duration + cycle_duration < timeLimit)) {
             int depth = 1;
             total_duration += cycle_duration;
             auto cycle_time = chrono::high_resolution_clock::now(); // actually evaluate beginning time
@@ -62,6 +62,7 @@ private :
             cycle_duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now()-cycle_time);
             MAX_DEPTH++;
         }
+
         return val._state->getActionTakenToGetHere();
     }
 
@@ -69,12 +70,11 @@ private :
         if (cutoff_test(s, depth)) return eval(s);
         value val(numeric_limits<double>::lowest(), s);
         // This is an action even though it's a state b/c we've taken the action to get to the successor
-        if (s != NULL) {
-            for (state *successor : s->getOrderedSuccessors(MAX_CHAR, *orderOfSuccession)) {
-                val = max(val, min_value(successor, alpha, beta, depth));
-                if (val >= beta) return val;
-                alpha = max(alpha, val);
-            }
+        for (state *successor : s->getOrderedSuccessors(MAX_CHAR, *orderOfSuccession)) {
+            val = max(val, min_value(successor, alpha, beta, depth));
+            cout << "VAL: " << val._value << " addr: " << val._state << " act: " << val._state->getActionTakenToGetHere().first << ":" << val._state->getActionTakenToGetHere().second << endl;
+            if (val >= beta) return val;
+            alpha = max(alpha, val);
         }
         return val;
     }
@@ -83,12 +83,10 @@ private :
         depth++; // turn depth not ply depth
         if (cutoff_test(s, depth)) return eval(s);
         value val(numeric_limits<double>::max(), s);
-        if (s != NULL) {
-            for (state *successor : s->getOrderedSuccessors(MIN_CHAR, *orderOfSuccession)) {
-                val = min(val, max_value(successor, alpha, beta, depth));
-                if (val <= alpha) return val;
-                beta = min(beta, val);
-            }
+        for (state *successor : s->getOrderedSuccessors(MIN_CHAR, *orderOfSuccession)) {
+            val = min(val, max_value(successor, alpha, beta, depth));
+            if (val <= alpha) return val;
+            beta = min(beta, val);
         }
         return val;
     }
