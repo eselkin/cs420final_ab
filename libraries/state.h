@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <regex>
+#include <queue>
 
 using namespace std;
 typedef pair<char, int> action;
@@ -19,7 +20,9 @@ private:
     double value;                               // why calculate these things twice?
     action takenToGetHere;                      // No need to keep track of parent just the move so the parent knows
     state* parent;
-    vector<state*>* successors;                 // Ordered list of successors TODO Not sure if we need this I think we should have to generate this every time we come to a state
+    priority_queue<state*, vector<state*>, greater_equal<state*> >* successorsMax;
+    priority_queue<state*, vector<state*>, less_equal<state*> >* successorsMin;
+    // Ordered list of successors TODO Not sure if we need this I think we should have to generate this every time we come to a state
 
 public:
 
@@ -33,10 +36,14 @@ public:
     void setValue(double value);
     bool makeMove(char r, int c, char typeChar);// success|failure
     action getActionTakenToGetHere();
-    vector<state*>& getOrderedSuccessors(char typeChar, bool isMax, vector<regex> orderOfSuccession);
+    priority_queue<state*, vector<state*>, greater_equal<state*>>& getOrderedSuccessorsMax(vector<regex> orderOfSuccession);
+    priority_queue<state*, vector<state*>, less_equal<state*>>& getOrderedSuccessorsMin(vector<regex> orderOfSuccession);
 
     friend std::ostream& operator<<(std::ostream&, const state&);
     string getStringFromRow(char *row);
+
+    template <typename T>
+    void operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_queue<state *, vector<state *>, T>*& pq, bool isMax, char typeChar);
 };
 
 // default constructor
@@ -97,24 +104,33 @@ string state::getStringFromRow(char* row){
     return string(row);
 }
 
-// TODO XXX!!!!!
-vector<state*>& state::getOrderedSuccessors(char typeChar, bool isMax, vector<regex> orderOfSuccession) {
-    char altChar = typeChar == 'X' ? 'O' : 'X';
-    this->successors = new vector<state *>();
+
+priority_queue<state *, vector<state *>, less_equal<state *>> &
+state::getOrderedSuccessorsMin(vector<regex> orderOfSuccession) {
+    this->successorsMin = new priority_queue<state*, vector<state*>, less_equal<state*> >();
+    swap(orderOfSuccession[0], orderOfSuccession[1]);
+    swap(orderOfSuccession[2], orderOfSuccession[3]);
+    swap(orderOfSuccession[4], orderOfSuccession[5]);
+    this->operateOrderOfSuccession(orderOfSuccession, this->successorsMin, true, 'O');
+    return *(this->successorsMin);
+}
+
+char** transpose(char **board, int d) {
     char **transpose_board = new char *[d];
     for (int i = 0; i < d; i++)
         transpose_board[i] = new char[d];
     for (int i = 0; i < d; i++) {
         for (int j = 0; j < d; j++) {
-            transpose_board[j][i] = this->board[i][j];
+            transpose_board[j][i] = board[i][j];
         }
     }
+    return transpose_board;
+};
+
+template <typename T>
+void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_queue<state*, vector<state*>, T>*& pq, bool isMax, char typeChar) {
+    char **transpose_board = transpose(this->board, this->d);
     smatch matcher;
-    if (typeChar != 'X'){
-        swap(orderOfSuccession[0], orderOfSuccession[1]);
-        swap(orderOfSuccession[2], orderOfSuccession[3]);
-        swap(orderOfSuccession[4], orderOfSuccession[5]);
-    }
     for (regex expression : orderOfSuccession) {
         for (int i = 0; i < d; i++) {
             string transposeRow = getStringFromRow(transpose_board[i]);
@@ -137,12 +153,11 @@ vector<state*>& state::getOrderedSuccessors(char typeChar, bool isMax, vector<re
                     successor_state->setValue(isMax? .5:-.5);
                 } else {
                     rowTemp = matcher.suffix().str();
-                    (this->successors)->push_back(successor_state);
+                    pq->push(successor_state);
                     continue;
                 }
-                (this->successors)->push_back(successor_state);
-                return *(this->successors);
-
+                pq->push(successor_state);
+                return;
             }
             rowTemp = transposeRow;
             while (regex_search(rowTemp, matcher, expression)) {
@@ -159,24 +174,28 @@ vector<state*>& state::getOrderedSuccessors(char typeChar, bool isMax, vector<re
                     successor_state->setValue(isMax? .5:-.5);
                 } else {
                     rowTemp = matcher.suffix().str();
-                    (this->successors)->push_back(successor_state);
+                    pq->push(successor_state);
                     continue;
                 }
-                (this->successors)->push_back(successor_state);
-                return *(this->successors);
+                pq->push(successor_state);
+                return;
             }
         }
     }
-    if (this->successors->size() == 0) { // if there was nothing else on the board then push back a random
+    if (pq->empty()) { // if there was nothing else on the board then push back a random
         state *random_successor = new state(this->board, this->d);
-        while (!random_successor->makeMove((char) (rand() % this->d), rand() % this->d, typeChar));
-        if (typeChar == 'X')
-            random_successor->setValue(0.25);
-        else
-            random_successor->setValue(-0.25);
-        (this->successors)->push_back(random_successor);
+        while (!random_successor->makeMove((char) ('A'+(rand() % this->d)), rand() % this->d, typeChar));
+        random_successor->setValue(isMax? 0.25 : -0.25);
+        pq->push(random_successor);
     }
-    return *(this->successors);
+};
+
+// TODO XXX!!!!!
+priority_queue<state*, vector<state*>, greater_equal<state*> >& state::getOrderedSuccessorsMax(vector<regex> orderOfSuccession) {
+    this->successorsMax = new priority_queue<state*, vector<state*>, greater_equal<state*> >();
+    this->operateOrderOfSuccession(orderOfSuccession, this->successorsMax, true, 'X');
+
+    return *(this->successorsMax);
 }
 
 action state::getActionTakenToGetHere() {
@@ -209,6 +228,7 @@ double state::getValue() const {
 void state::setValue(double value) {
     this->value = value;
 }
+
 
 
 #endif // STATE_H

@@ -24,61 +24,23 @@ int main(int argc, char *argv[])
 
     cout << *game;
     vector<regex>* orderOfSuccession = new vector<regex>();
-    char typeChar = 'X', altChar = 'O';
-    if (humanFirst) {
-        typeChar = 'O';
-        altChar = 'X';
-    }
-    cout << " typechar: " << typeChar << endl << endl;
-    stringstream conv;
-    conv << "(-)(?:" << typeChar << typeChar << typeChar << ")|(?:"<< typeChar << typeChar << typeChar << ")(-)";
-    orderOfSuccession->push_back(regex(conv.str())); // win
-    conv.str("");
-    conv.flush();
-    conv << "(-)(?:" << altChar << altChar << altChar << ")|(?:"<< altChar << altChar << altChar << ")(-)";
-    orderOfSuccession->push_back(regex(conv.str())); // block win
-    conv.str("");
-    conv.flush();
-    conv << "(-)(?:" << typeChar << typeChar << ")|(?:"<< typeChar << typeChar << ")(-)";
-    orderOfSuccession->push_back(regex(conv.str())); // improve chance of winning
-    conv.str("");
-    conv.flush();
-    conv << "(-)(?:" << altChar << altChar << ")|(?:"<< altChar << altChar << ")(-)";
-    orderOfSuccession->push_back(regex(conv.str())); // further reduce chance of losing
-    conv.str("");
-    conv.flush();
-    conv << "(-)(?:" << typeChar << ")|(?:" << typeChar << ")(-)";
-    orderOfSuccession->push_back(regex(conv.str()));
-    conv.str("");
-    conv.flush();
-    conv << "(-)(?:" << altChar << ")|(?:" << altChar << ")(-)";
-    orderOfSuccession->push_back(regex(conv.str()));
-    conv.str("");
-    conv.flush();
+    orderOfSuccession->push_back(regex("(-)(?:XXX)|(?:XXX)(-)")); // win
+    orderOfSuccession->push_back(regex("(-)(?:OOO)|(?:OOO)(-)")); // block win
+    orderOfSuccession->push_back(regex("(-)(?:XX)|(?:XX)(-)")); // improve chance of winning
+    orderOfSuccession->push_back(regex("(-)(?:OO)|(?:OO)(-)")); // further reduce chance of losing
+    orderOfSuccession->push_back(regex("(-)(?:X)|(?:X)(-)"));
+    orderOfSuccession->push_back(regex("(-)(?:O)|(?:O)(-)"));
 
-    string move;
-    prompt("Enter your move? ", move);
-    while(validate(move, game, BOARD_SIZE) == nullptr) {
-        prompt("Enter your move? ", move);
-    }
-    action act = *validate(move, game, BOARD_SIZE);
-    //game->makeMove(act.first, act.second, 'X');
-    game->makeMove('E', 5, 'X');
-    game->makeMove('D', 5, 'O');
-    game->makeMove('E', 4, 'X');
-    game->makeMove('E', 3, 'O');
-    game->makeMove('F', 4, 'X');
-    game->makeMove('D', 4, 'O');
+    //    string move;
+    //    prompt("Enter your move? ", move);
+    //    while(validate(move, game, BOARD_SIZE) == nullptr) {
+    //        prompt("Enter your move? ", move);
+    //    }
+    //    action act = *validate(move, game, BOARD_SIZE);
     game->makeMove('E', 6, 'X');
-    game->makeMove('E', 7, 'O');
-    game->makeMove('G', 4, 'X');
-    game->makeMove('H', 4, 'O');
-    game->makeMove('D', 6, 'X');
-    game->makeMove('D', 3, 'O');
-    game->makeMove('D', 2, 'X');
-    game->makeMove('C', 3, 'O');
-    game->makeMove('B', 3, 'X');
-    A_B_SearchClass* a_b_searchClass = new A_B_SearchClass(game, orderOfSuccession, chrono::seconds(timeLimit), typeChar, altChar);
+    game->makeMove('E', 5, 'O');
+
+    A_B_SearchClass* a_b_searchClass = new A_B_SearchClass(game, orderOfSuccession, chrono::seconds(timeLimit));
     cout << *game;
     cout << "Computer played: " << a_b_searchClass->getBestAction().first << a_b_searchClass->getBestAction().second << endl;
 
