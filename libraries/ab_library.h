@@ -28,7 +28,7 @@ public:
         this->orderOfSuccession = orderOfSuccession;
         this->bestAction = ab_search(s);
         cout << bestAction.first << " + " << bestAction.second << endl << endl;
-        s->makeMove(this->bestAction.first, this->bestAction.second+1, 'X');
+        s->makeMove(this->bestAction.first, this->bestAction.second, 'X');
         win = new regex("XXXX");
         loss = new regex("OOOO");
     }
@@ -56,13 +56,13 @@ private :
         chrono::microseconds cycle_duration = chrono::microseconds(0);
         chrono::microseconds total_duration = chrono::microseconds(0);
 
-        while(MAX_DEPTH < 100 && (cycle_duration + total_duration < timeLimit) ) {
+        while((3*cycle_duration + total_duration < timeLimit) ) {
             int depth = 1;
             total_duration += cycle_duration;
             auto cycle_time = chrono::high_resolution_clock::now(); // actually evaluate beginning time
             value alpha(numeric_limits<double>::lowest(), nullptr);
             value beta(numeric_limits<double>::max(), nullptr);
-            val = max(val, max_value(s, alpha, beta, depth));
+            val = max_value(s, alpha, beta, depth);
             cycle_duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now()-cycle_time);
             MAX_DEPTH++;
         }

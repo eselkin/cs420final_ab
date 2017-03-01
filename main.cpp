@@ -41,6 +41,8 @@ int main(int argc, char *argv[])
     game->makeMove('B', 4, 'O');
     game->makeMove('B', 5, 'X');
     game->makeMove('C', 4, 'O');
+    game->makeMove('A', 5, 'X');
+    game->makeMove('A', 4, 'O');
 
     A_B_SearchClass* a_b_searchClass = new A_B_SearchClass(game, orderOfSuccession, chrono::seconds(timeLimit));
     cout << *game;
