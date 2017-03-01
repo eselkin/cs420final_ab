@@ -38,15 +38,27 @@ int main(int argc, char *argv[])
     //    }
     //    action act = *validate(move, game, BOARD_SIZE);
 
-    game->makeMove('B', 4, 'O');
-    game->makeMove('B', 5, 'X');
+    game->makeMove('C', 5, 'X');
+    game->makeMove('D', 5, 'O');
+    game->makeMove('D', 4, 'X');
     game->makeMove('C', 4, 'O');
-    game->makeMove('A', 5, 'X');
-    game->makeMove('A', 4, 'O');
+    game->makeMove('E', 4, 'X');
+    game->makeMove('E', 5, 'O');
+    game->makeMove('F', 5, 'X');
+    game->makeMove('F', 4, 'O');
+    game->makeMove('E', 3, 'X');
+    game->makeMove('D', 3, 'O');
+    game->makeMove('F', 3, 'X');
+    game->makeMove('C', 3, 'O');
+    game->makeMove('C', 2, 'X');
+    game->makeMove('D', 6, 'O');
+    game->makeMove('B', 3, 'X');
+    game->makeMove('E', 6, 'O');
+    game->makeMove('D', 7, 'X');
 
     A_B_SearchClass* a_b_searchClass = new A_B_SearchClass(game, orderOfSuccession, chrono::seconds(timeLimit));
     cout << *game;
-    cout << "Computer played: " << a_b_searchClass->getBestAction().first << a_b_searchClass->getBestAction().second+1 << endl;
+    cout << "Computer played: " << a_b_searchClass->getBestAction().first << a_b_searchClass->getBestAction().second << endl;
 
     return 0;
 }

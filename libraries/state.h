@@ -161,10 +161,10 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                 if (matcher[1].length() == 0) {
                     pos = (int) matcher.prefix().length() + (int) matcher[0].length();
                 } else {
-                    pos = (int) matcher.prefix().length();
+                    pos = (int) matcher.prefix().length()+1;
                 }
                 state *successor_state = new state(this->board, this->d);
-                successor_state->makeMove((char)(i + 'A'), pos+1, typeChar);
+                successor_state->makeMove((char)(i + 'A'), pos, typeChar);
                 if (matcher[0].length() == 4) {
                     successor_state->setValue(isMax? 1:-1);
                 } else if (matcher[0].length() == 3) {
