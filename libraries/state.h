@@ -13,15 +13,26 @@
 using namespace std;
 typedef pair<char, int> action;
 
+
 class state {
+public:
+    class greater_comp {
+    public:
+        bool operator() (state* a, state* b) { return a->getValue() <= b->getValue();}
+    };
+
+    class less_comp {
+    public:
+        bool operator() (state* a, state* b) { return a->getValue() >= b->getValue();}
+    };
 private:
     int d;                                      // board dimension
     char **board;                               // X, O, - (ASCII: 88, 79, 45)
     double value;                               // why calculate these things twice?
     action takenToGetHere;                      // No need to keep track of parent just the move so the parent knows
     state* parent;
-    priority_queue<state*, vector<state*>, greater_equal<state*> >* successorsMax;
-    priority_queue<state*, vector<state*>, less_equal<state*> >* successorsMin;
+    priority_queue<state*, vector<state*>, state::greater_comp >* successorsMax;
+    priority_queue<state*, vector<state*>, state::less_comp >* successorsMin;
     // Ordered list of successors TODO Not sure if we need this I think we should have to generate this every time we come to a state
 
 public:
@@ -36,15 +47,18 @@ public:
     void setValue(double value);
     bool makeMove(char r, int c, char typeChar);// success|failure
     action getActionTakenToGetHere();
-    priority_queue<state*, vector<state*>, greater_equal<state*>>& getOrderedSuccessorsMax(vector<regex> orderOfSuccession);
-    priority_queue<state*, vector<state*>, less_equal<state*>>& getOrderedSuccessorsMin(vector<regex> orderOfSuccession);
+    priority_queue<state*, vector<state*>, greater_comp>& getOrderedSuccessorsMax(vector<regex> orderOfSuccession);
+    priority_queue<state*, vector<state*>, less_comp>& getOrderedSuccessorsMin(vector<regex> orderOfSuccession);
 
     friend std::ostream& operator<<(std::ostream&, const state&);
     string getStringFromRow(char *row);
 
     template <typename T>
     void operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_queue<state *, vector<state *>, T>*& pq, bool isMax, char typeChar);
+
 };
+
+
 
 // default constructor
 state::state(int dimension) {
@@ -101,13 +115,13 @@ bool state::makeMove(char r, int c, char typeChar) {
 }
 
 string state::getStringFromRow(char* row){
-    return string(row);
+    return string(row, this->d);
 }
 
 
-priority_queue<state *, vector<state *>, less_equal<state *>> &
+priority_queue<state *, vector<state *>, state::less_comp > &
 state::getOrderedSuccessorsMin(vector<regex> orderOfSuccession) {
-    this->successorsMin = new priority_queue<state*, vector<state*>, less_equal<state*> >();
+    this->successorsMin = new priority_queue<state*, vector<state*>, state::less_comp >();
     swap(orderOfSuccession[0], orderOfSuccession[1]);
     swap(orderOfSuccession[2], orderOfSuccession[3]);
     swap(orderOfSuccession[4], orderOfSuccession[5]);
@@ -148,16 +162,12 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                 if (matcher[0].length() == 4) {
                     successor_state->setValue(isMax? 1:-1);
                 } else if (matcher[0].length() == 3) {
-                    successor_state->setValue(isMax? .75:-.75);
+                    successor_state->setValue(isMax? .75:-.9);
                 } else if (matcher[0].length() == 2) {
-                    successor_state->setValue(isMax? .5:-.5);
-                } else {
-                    rowTemp = matcher.suffix().str();
-                    pq->push(successor_state);
-                    continue;
+                    successor_state->setValue(isMax? .75:-.8);
                 }
+                rowTemp = matcher.suffix().str();
                 pq->push(successor_state);
-                return;
             }
             rowTemp = transposeRow;
             while (regex_search(rowTemp, matcher, expression)) {
@@ -167,32 +177,29 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                 state *successor_state = new state(this->board, this->d);
                 successor_state->makeMove((char) (pos + 'A'), i, typeChar);
                 if (matcher[0].length() == 4) {
-                    successor_state->setValue(isMax? 1:-1);
+                    successor_state->setValue(isMax? 1.:-1.2);
                 } else if (matcher[0].length() == 3) {
-                    successor_state->setValue(isMax? .75:-.75);
+                    successor_state->setValue(isMax? 1.:-1.1);
                 } else if (matcher[0].length() == 2) {
-                    successor_state->setValue(isMax? .5:-.5);
-                } else {
-                    rowTemp = matcher.suffix().str();
-                    pq->push(successor_state);
-                    continue;
+                    successor_state->setValue(isMax? .75:-.8);
                 }
+                rowTemp = matcher.suffix().str();
                 pq->push(successor_state);
-                return;
             }
         }
     }
     if (pq->empty()) { // if there was nothing else on the board then push back a random
         state *random_successor = new state(this->board, this->d);
-        while (!random_successor->makeMove((char) ('A'+(rand() % this->d)), rand() % this->d, typeChar));
+        while (!random_successor->makeMove((char) ('A'+((rand() % (this->d-2))+2)), (rand() % (this->d-2))+2, typeChar));
         random_successor->setValue(isMax? 0.25 : -0.25);
         pq->push(random_successor);
     }
+    return;
 };
 
 // TODO XXX!!!!!
-priority_queue<state*, vector<state*>, greater_equal<state*> >& state::getOrderedSuccessorsMax(vector<regex> orderOfSuccession) {
-    this->successorsMax = new priority_queue<state*, vector<state*>, greater_equal<state*> >();
+priority_queue<state*, vector<state*>, state::greater_comp>& state::getOrderedSuccessorsMax(vector<regex> orderOfSuccession) {
+    this->successorsMax = new priority_queue<state*, vector<state*>, state::greater_comp>();
     this->operateOrderOfSuccession(orderOfSuccession, this->successorsMax, true, 'X');
 
     return *(this->successorsMax);

@@ -72,7 +72,7 @@ private :
         if (cutoff_test(s, depth)) return eval(s);
         value val(numeric_limits<double>::lowest(), s);
         // This is an action even though it's a state b/c we've taken the action to get to the successor
-        priority_queue<state*, vector<state*>, greater_equal<state*> > pq;
+        priority_queue<state*, vector<state*>, state::greater_comp> pq;
         pq = s->getOrderedSuccessorsMax(*orderOfSuccession);
         while (!pq.empty()) {
             state* successor = pq.top();
@@ -88,7 +88,7 @@ private :
         depth++; // turn depth not ply depth
         if (cutoff_test(s, depth)) return eval(s);
         value val(numeric_limits<double>::max(), s);
-        priority_queue<state*, vector<state*>, less_equal<state*> > pq;
+        priority_queue<state*, vector<state*>, state::less_comp> pq;
         pq = s->getOrderedSuccessorsMin(*orderOfSuccession);
         while (!pq.empty()) {
             state* successor = pq.top();
