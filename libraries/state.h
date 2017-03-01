@@ -18,12 +18,12 @@ class state {
 public:
     class greater_comp {
     public:
-        bool operator() (state* a, state* b) { return a->getValue() < b->getValue();}
+        bool operator() (state* a, state* b) { return a->getValue() <= b->getValue();}
     };
 
     class less_comp {
     public:
-        bool operator() (state* a, state* b) { return a->getValue() > b->getValue();}
+        bool operator() (state* a, state* b) { return a->getValue() >= b->getValue();}
     };
 private:
     int d;                                      // board dimension
@@ -146,17 +146,10 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
     smatch matcher;
     for (regex expression : orderOfSuccession) {
         for (int i = 0; i < d; i++) {
-            cout << " isMax: "<< (isMax ? "true" : "false") << endl;
             string transposeRow = getStringFromRow(transpose_board[i]);
             string row = getStringFromRow(this->board[i]);
             string rowTemp(row);
-            cout << *this << endl;
-            cout << "row : "<< row << endl;
             if (regex_search(rowTemp, matcher, expression)) {
-                cout << "size: " << matcher.size() << endl;
-                for (auto match : matcher) {
-                    cout << "a["<< match << "]" << endl;
-                }
                 int pos;
                 if (matcher[1].length() == 0) {
                     pos = (int) matcher.prefix().length() + (int) matcher[0].length();
@@ -168,28 +161,23 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                 if (matcher[0].length() == 4) {
                     successor_state->setValue(isMax? 1:-1);
                 } else if (matcher[0].length() == 3) {
-                    successor_state->setValue(isMax? .75:-.75);
+                    successor_state->setValue(isMax? 1:-1.);
                 } else if (matcher[0].length() == 2) {
                     successor_state->setValue(isMax? .5:-.5);
                 }
                 pq->push(successor_state);
             }
             rowTemp = transposeRow;
-            cout <<"temp: "<< rowTemp << endl;
             if (regex_search(rowTemp, matcher, expression)) {
                 int pos;
                 pos = matcher[1].length() == 0 ? (int) matcher.prefix().length() + (int) matcher[0].length()-1 : (int) matcher.prefix().length();
                 // this means a column i has a killer move and row pos
-                for (auto match : matcher) {
-                    cout << "["<< match << "]" << endl;
-                }
-                cout << "pos" << rowTemp[pos] << " at " << char('A'+pos) << "+" << i+1 << endl;
                 state *successor_state = new state(this->board, this->d);
                 successor_state->makeMove((char) (pos + 'A'), i+1, typeChar);
                 if (matcher[0].length() == 4) {
                     successor_state->setValue(isMax? 1.1:-1.1);
                 } else if (matcher[0].length() == 3) {
-                    successor_state->setValue(isMax? .75:-.75);
+                    successor_state->setValue(isMax? 1:-1.);
                 } else if (matcher[0].length() == 2) {
                     successor_state->setValue(isMax? .5:-.5);
                 }
@@ -201,7 +189,7 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
     }
     if (pq->empty()) { // if there was nothing else on the board then push back a random
         state *random_successor = new state(this->board, this->d);
-        while (!random_successor->makeMove((char) ('A'+((rand() % (this->d-2))+2)), (rand() % (this->d-2))+2, typeChar));
+        while (!random_successor->makeMove((char) ('A'+((rand() % (this->d-4))+3)), (rand() % (this->d-6))+3+1, typeChar));
         random_successor->setValue(isMax? 0.25 : -0.25);
         pq->push(random_successor);
     }

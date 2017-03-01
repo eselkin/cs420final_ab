@@ -76,14 +76,9 @@ private :
         priority_queue<state*, vector<state*>, state::greater_comp> pq;
         pq = s->getOrderedSuccessorsMax(*orderOfSuccession);
         while (!pq.empty()) {
-            cout << "popping" << endl;
-            cout << *pq.top() << endl;
-            cout << "val: " << pq.top()->getValue() << endl;
             state* successor = pq.top();
             pq.pop();
             val = max(val, min_value(successor, alpha, beta, depth));
-            cout << "val val: " << val._state->getValue() << endl;
-            cout << "val state: " << endl << *val._state << endl;
             if (val >= beta) return val;
             alpha = max(alpha, val);
         }
