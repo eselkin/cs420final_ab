@@ -28,7 +28,7 @@ public:
         this->orderOfSuccession = orderOfSuccession;
         this->bestAction = ab_search(s);
         cout << bestAction.first << " + " << bestAction.second << endl << endl;
-        s->makeMove(this->bestAction.first, this->bestAction.second, 'X');
+        s->makeMove(this->bestAction.first, this->bestAction.second+1, 'X');
         win = new regex("XXXX");
         loss = new regex("OOOO");
     }
@@ -52,16 +52,17 @@ private :
     action ab_search(state* s) {
         this->startTime = chrono::high_resolution_clock::now(); // actually evaluate beginning time
         this->MAX_DEPTH = 1;
-        value val(0.0, nullptr);
+        value val(0.0, s);
         chrono::microseconds cycle_duration = chrono::microseconds(0);
         chrono::microseconds total_duration = chrono::microseconds(0);
-        while(MAX_DEPTH < 100 && (total_duration + cycle_duration < timeLimit)) {
+
+        while(MAX_DEPTH < 100 && (cycle_duration + total_duration < timeLimit) ) {
             int depth = 1;
             total_duration += cycle_duration;
             auto cycle_time = chrono::high_resolution_clock::now(); // actually evaluate beginning time
             value alpha(numeric_limits<double>::lowest(), nullptr);
             value beta(numeric_limits<double>::max(), nullptr);
-            val = max_value(s, alpha, beta, depth);
+            val = max(val, max_value(s, alpha, beta, depth));
             cycle_duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now()-cycle_time);
             MAX_DEPTH++;
         }
@@ -75,9 +76,14 @@ private :
         priority_queue<state*, vector<state*>, state::greater_comp> pq;
         pq = s->getOrderedSuccessorsMax(*orderOfSuccession);
         while (!pq.empty()) {
+            cout << "popping" << endl;
+            cout << *pq.top() << endl;
+            cout << "val: " << pq.top()->getValue() << endl;
             state* successor = pq.top();
             pq.pop();
             val = max(val, min_value(successor, alpha, beta, depth));
+            cout << "val val: " << val._state->getValue() << endl;
+            cout << "val state: " << endl << *val._state << endl;
             if (val >= beta) return val;
             alpha = max(alpha, val);
         }

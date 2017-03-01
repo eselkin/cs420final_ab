@@ -37,20 +37,14 @@ int main(int argc, char *argv[])
     //        prompt("Enter your move? ", move);
     //    }
     //    action act = *validate(move, game, BOARD_SIZE);
-    game->makeMove('D', 5, 'O');
-    game->makeMove('D', 4, 'X');
-    game->makeMove('E', 5, 'O');
-//    game->makeMove('D', 4, 'X');
-//    game->makeMove('C', 4, 'O');
-//    game->makeMove('B', 4, 'X');
-//    game->makeMove('D', 6, 'O');
-//    game->makeMove('E', 5, 'X');
-//    game->makeMove('E', 6, 'O');
-//    game->makeMove('C', 3, 'X');
-//    game->makeMove('C', 6, 'O');
+
+    game->makeMove('B', 4, 'O');
+    game->makeMove('B', 5, 'X');
+    game->makeMove('C', 4, 'O');
+
     A_B_SearchClass* a_b_searchClass = new A_B_SearchClass(game, orderOfSuccession, chrono::seconds(timeLimit));
     cout << *game;
-    cout << "Computer played: " << a_b_searchClass->getBestAction().first << a_b_searchClass->getBestAction().second << endl;
+    cout << "Computer played: " << a_b_searchClass->getBestAction().first << a_b_searchClass->getBestAction().second+1 << endl;
 
     return 0;
 }
