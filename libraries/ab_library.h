@@ -23,13 +23,14 @@ public:
     chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
 
     // constructor
-    A_B_SearchClass(state* s, vector<regex>* orderOfSuccession, chrono::seconds timeLimit = chrono::seconds(30), char minchar = 'O', char maxchar = 'X') {
+    A_B_SearchClass(state* &s, vector<regex>* orderOfSuccession, chrono::seconds timeLimit = chrono::seconds(30), char minchar = 'O', char maxchar = 'X') {
         this->timeLimit = timeLimit;
         this->MIN_CHAR = minchar; // this way we don't need to switch around the formula whichever user goes first
         this->MAX_CHAR = maxchar;
         this->orderOfSuccession = orderOfSuccession;
-        action bestAction = ab_search(s);
-        s->makeMove(bestAction.first, bestAction.second, maxchar);
+        this->bestAction = ab_search(s);
+        cout << bestAction.first << " + " << bestAction.second << endl << endl;
+        s->makeMove(this->bestAction.first, this->bestAction.second, maxchar);
         win = new regex(string({maxchar, maxchar, maxchar, maxchar}));
         loss = new regex(string({minchar, minchar, minchar, minchar}));
     }
@@ -40,10 +41,14 @@ public:
     value min(const value &a, const value &b) {
         return a._value < b._value ? a : b;
     }
+    action getBestAction(){
+        return this->bestAction;
+    }
 
 private :
     char MIN_CHAR, MAX_CHAR;
     int MAX_DEPTH;
+    action bestAction;
     vector<regex>* orderOfSuccession;
     // the actual search begins here!
     action ab_search(state* s) {
@@ -52,8 +57,8 @@ private :
         value val(0.0, nullptr);
         chrono::microseconds cycle_duration = chrono::microseconds(0);
         chrono::microseconds total_duration = chrono::microseconds(0);
-        while(MAX_DEPTH < 10 && (total_duration + cycle_duration < timeLimit)) {
-            int depth = 1;
+        while(MAX_DEPTH < 20 && (total_duration + cycle_duration < timeLimit)) {
+            int depth = 2;
             total_duration += cycle_duration;
             auto cycle_time = chrono::high_resolution_clock::now(); // actually evaluate beginning time
             value alpha(numeric_limits<double>::lowest(), nullptr);
@@ -62,7 +67,6 @@ private :
             cycle_duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now()-cycle_time);
             MAX_DEPTH++;
         }
-
         return val._state->getActionTakenToGetHere();
     }
 
@@ -70,9 +74,8 @@ private :
         if (cutoff_test(s, depth)) return eval(s);
         value val(numeric_limits<double>::lowest(), s);
         // This is an action even though it's a state b/c we've taken the action to get to the successor
-        for (state *successor : s->getOrderedSuccessors(MAX_CHAR, *orderOfSuccession)) {
+        for (state *successor : s->getOrderedSuccessors(MAX_CHAR, true, *orderOfSuccession)) {
             val = max(val, min_value(successor, alpha, beta, depth));
-            cout << "VAL: " << val._value << " addr: " << val._state << " act: " << val._state->getActionTakenToGetHere().first << ":" << val._state->getActionTakenToGetHere().second << endl;
             if (val >= beta) return val;
             alpha = max(alpha, val);
         }
@@ -83,7 +86,7 @@ private :
         depth++; // turn depth not ply depth
         if (cutoff_test(s, depth)) return eval(s);
         value val(numeric_limits<double>::max(), s);
-        for (state *successor : s->getOrderedSuccessors(MIN_CHAR, *orderOfSuccession)) {
+        for (state *successor : s->getOrderedSuccessors(MIN_CHAR, false, *orderOfSuccession)) {
             val = min(val, max_value(successor, alpha, beta, depth));
             if (val <= alpha) return val;
             beta = min(beta, val);

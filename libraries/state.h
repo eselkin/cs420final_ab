@@ -33,7 +33,7 @@ public:
     void setValue(double value);
     bool makeMove(char r, int c, char typeChar);// success|failure
     action getActionTakenToGetHere();
-    vector<state*>& getOrderedSuccessors(char typeChar, vector<regex> orderOfSuccession);
+    vector<state*>& getOrderedSuccessors(char typeChar, bool isMax, vector<regex> orderOfSuccession);
 
     friend std::ostream& operator<<(std::ostream&, const state&);
     string getStringFromRow(char *row);
@@ -89,7 +89,7 @@ int state::getDimension() const {
 
 // ternary move returns true if move was made, false otherwise... except in the off chance your typeChar is 0
 bool state::makeMove(char r, int c, char typeChar) {
-    this->takenToGetHere = action(r, c);
+    this->takenToGetHere = action(r, c+1);
     return this->board[r-'A'][c-1] == '-' ? (this->board[r-'A'][c-1] = typeChar) : false;
 }
 
@@ -98,7 +98,7 @@ string state::getStringFromRow(char* row){
 }
 
 // TODO XXX!!!!!
-vector<state*>& state::getOrderedSuccessors(char typeChar, vector<regex> orderOfSuccession) {
+vector<state*>& state::getOrderedSuccessors(char typeChar, bool isMax, vector<regex> orderOfSuccession) {
     char altChar = typeChar == 'X' ? 'O' : 'X';
     this->successors = new vector<state *>();
     char **transpose_board = new char *[d];
@@ -108,9 +108,6 @@ vector<state*>& state::getOrderedSuccessors(char typeChar, vector<regex> orderOf
         for (int j = 0; j < d; j++) {
             transpose_board[j][i] = this->board[i][j];
         }
-    }
-    for (int i = 0; i < d; i++) {
-        cout << transpose_board[i] << endl;
     }
     smatch matcher;
     if (typeChar != 'X'){
@@ -132,59 +129,41 @@ vector<state*>& state::getOrderedSuccessors(char typeChar, vector<regex> orderOf
                 }
                 state *successor_state = new state(this->board, this->d);
                 successor_state->makeMove((char)(i + 'A'), pos, typeChar);
-                cout << "made move... row: " << char(i + 'A') << " col: " << pos << " char: "<< typeChar << endl;
-                cout << successor_state->getActionTakenToGetHere().first << " + " << successor_state->getActionTakenToGetHere().second << endl;
-                cout << "curr row: " << char(i+'A') << " is: " << rowTemp << endl;
                 if (matcher[0].length() == 4) {
-                    if (typeChar == 'X')
-                        successor_state->setValue(1.0);
-                    else
-                        successor_state->setValue(-1.0);
+                    successor_state->setValue(isMax? 1:-1);
                 } else if (matcher[0].length() == 3) {
-                    if (typeChar == 'X')
-                        successor_state->setValue(0.75);
-                    else
-                        successor_state->setValue(-0.75);
+                    successor_state->setValue(isMax? .75:-.75);
                 } else if (matcher[0].length() == 2) {
-                    if (typeChar == 'X')
-                        successor_state->setValue(0.5);
-                    else
-                        successor_state->setValue(-0.5);
+                    successor_state->setValue(isMax? .5:-.5);
+                } else {
+                    rowTemp = matcher.suffix().str();
+                    (this->successors)->push_back(successor_state);
+                    continue;
                 }
                 (this->successors)->push_back(successor_state);
-                rowTemp = matcher.suffix().str();
+                return *(this->successors);
+
             }
             rowTemp = transposeRow;
             while (regex_search(rowTemp, matcher, expression)) {
                 int pos;
-                if (matcher[1].length() == 0) {
-                    pos = (int) matcher.prefix().length() + (int) matcher[0].length() - 1;
-                } else {
-                    pos = (int) matcher.prefix().length();
-                }
+                pos = matcher[1].length() == 0 ? (int) matcher.prefix().length() + (int) matcher[0].length() - 1 : (int) matcher.prefix().length();
                 // this means a column i has a killer move and row pos
                 state *successor_state = new state(this->board, this->d);
-                successor_state->makeMove((char) (pos + 'A'), i+1, typeChar);
-                cout << "curr col: " << i+1 << " is: " << rowTemp << endl;
-                cout <<  "2 made move... row: " << char(pos + 'A') << " col: " << i << "type: " << typeChar << endl;
+                successor_state->makeMove((char) (pos + 'A'), i, typeChar);
                 if (matcher[0].length() == 4) {
-                    if (typeChar == 'X')
-                        successor_state->setValue(1.0);
-                    else
-                        successor_state->setValue(-1.0);
+                    successor_state->setValue(isMax? 1:-1);
                 } else if (matcher[0].length() == 3) {
-                    if (typeChar == 'X')
-                        successor_state->setValue(0.75);
-                    else
-                        successor_state->setValue(-0.75);
+                    successor_state->setValue(isMax? .75:-.75);
                 } else if (matcher[0].length() == 2) {
-                    if (typeChar == 'X')
-                        successor_state->setValue(0.5);
-                    else
-                        successor_state->setValue(-0.5);
+                    successor_state->setValue(isMax? .5:-.5);
+                } else {
+                    rowTemp = matcher.suffix().str();
+                    (this->successors)->push_back(successor_state);
+                    continue;
                 }
                 (this->successors)->push_back(successor_state);
-                rowTemp = matcher.suffix().str();
+                return *(this->successors);
             }
         }
     }
