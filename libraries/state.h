@@ -18,12 +18,12 @@ class state {
 public:
     class greater_comp {
     public:
-        bool operator() (state* a, state* b) { return a->getValue() <= b->getValue();}
+        bool operator() (state* a, state* b) { return a->getValue() >= b->getValue();}
     };
 
     class less_comp {
     public:
-        bool operator() (state* a, state* b) { return a->getValue() >= b->getValue();}
+        bool operator() (state* a, state* b) { return a->getValue() <= b->getValue();}
     };
 private:
     int d;                                      // board dimension
@@ -202,7 +202,6 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                 }
                 pq->push(successor_state);
             }
-            system("wait");
         }
 
     }
