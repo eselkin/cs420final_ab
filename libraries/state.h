@@ -110,8 +110,13 @@ int state::getDimension() const {
 
 // ternary move returns true if move was made, false otherwise... except in the off chance your typeChar is 0
 bool state::makeMove(char r, int c, char typeChar) {
-    this->takenToGetHere = action(r, c);
-    return this->board[r-'A'][c-1] == '-' ? (this->board[r-'A'][c-1] = typeChar) : false;
+    if (this->board[r-'A'][c-1] == '-') {
+        this->takenToGetHere = action(r, c);
+        this->board[r-'A'][c-1] = typeChar;
+        return true;
+    }
+    return false;
+    //return this->board[r-'A'][c-1] == '-' ? (this->board[r-'A'][c-1] = typeChar) : false;
 }
 
 string state::getStringFromRow(char* row){
@@ -144,6 +149,7 @@ template <typename T>
 void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_queue<state*, vector<state*>, T>*& pq, bool isMax, char typeChar) {
     char **transpose_board = transpose(this->board, this->d);
     smatch matcher;
+    smatch matcher2;
     for (regex expression : orderOfSuccession) {
         for (int i = 0; i < d; i++) {
             string transposeRow = getStringFromRow(transpose_board[i]);
@@ -161,24 +167,37 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                 if (matcher[0].length() == 4) {
                     successor_state->setValue(isMax? 1:-1);
                 } else if (matcher[0].length() == 3) {
-                    successor_state->setValue(isMax? 1:-1.);
+                    if (isMax && matcher[0].str().find("O") != string::npos)
+                        successor_state->setValue(1.0);
+                    else
+                        successor_state->setValue(isMax? .75:-.75);
                 } else if (matcher[0].length() == 2) {
                     successor_state->setValue(isMax? .5:-.5);
                 }
                 pq->push(successor_state);
             }
-            rowTemp = transposeRow;
-            if (regex_search(rowTemp, matcher, expression)) {
+            string rowTempTranspose(transposeRow);
+            if (regex_search(rowTempTranspose, matcher2, expression)) {
                 int pos;
-                pos = matcher[1].length() == 0 ? (int) matcher.prefix().length() + (int) matcher[0].length()-1 : (int) matcher.prefix().length();
+                pos = matcher2[1].length() == 0 ? (int) matcher2.prefix().length() + (int) matcher2[0].length()-1 : (int) matcher2.prefix().length();
                 // this means a column i has a killer move and row pos
                 state *successor_state = new state(this->board, this->d);
-                successor_state->makeMove((char) (pos + 'A'), i+1, typeChar);
+
+                cout << "MAKE MOVE: " << successor_state->makeMove((char) (pos + 'A'), i+1, typeChar) << " with: " << typeChar << endl;
                 if (matcher[0].length() == 4) {
-                    successor_state->setValue(isMax? 1.1:-1.1);
-                } else if (matcher[0].length() == 3) {
-                    successor_state->setValue(isMax? 1:-1.);
-                } else if (matcher[0].length() == 2) {
+                    successor_state->setValue(isMax? 1:-1);
+                } else if (matcher2[0].length() == 3) {
+                    if (isMax && matcher2[0].str().find("O") != string::npos) {
+                        successor_state->setValue(1.1);
+                        cout << "block" << endl;
+                        cout << *successor_state << endl;
+                    }
+                    else {
+                        cout << "adding: " << endl;
+                        cout << *successor_state << endl;
+                        successor_state->setValue(isMax ? .75 : -.75);
+                    }
+                } else if (matcher2[0].length() == 2) {
                     successor_state->setValue(isMax? .5:-.5);
                 }
                 pq->push(successor_state);

@@ -37,8 +37,9 @@ int main(int argc, char *argv[])
     //        prompt("Enter your move? ", move);
     //    }
     //    action act = *validate(move, game, BOARD_SIZE);
-    game->makeMove('D', 5, 'O');
     game->makeMove('D', 4, 'X');
+    game->makeMove('D', 5, 'O');
+    game->makeMove('D', 6, 'X');
     game->makeMove('E', 5, 'O');
     //game->makeMove('E', 4, 'X');
 //    game->makeMove('C', 4, 'X');

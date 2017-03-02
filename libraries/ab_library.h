@@ -51,20 +51,20 @@ private :
     // the actual search begins here!
     action ab_search(state* s) {
         this->startTime = chrono::high_resolution_clock::now(); // actually evaluate beginning time
-        this->MAX_DEPTH = 1;
+        this->MAX_DEPTH = 5;
         value val(0.0, s);
         chrono::microseconds cycle_duration = chrono::microseconds(0);
         chrono::microseconds total_duration = chrono::microseconds(0);
-
-        while((3*cycle_duration + total_duration < timeLimit) ) {
+        while((cycle_duration + total_duration < timeLimit) ) {
             int depth = 1;
             total_duration += cycle_duration;
             auto cycle_time = chrono::high_resolution_clock::now(); // actually evaluate beginning time
             value alpha(numeric_limits<double>::lowest(), nullptr);
             value beta(numeric_limits<double>::max(), nullptr);
-            val = max_value(s, alpha, beta, depth);
+            val = max(val, max_value(val._state, alpha, beta, depth));
             cycle_duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now()-cycle_time);
             MAX_DEPTH++;
+            cout << *(val._state);
         }
         return val._state->getActionTakenToGetHere();
     }
@@ -79,6 +79,7 @@ private :
             state* successor = pq.top();
             pq.pop();
             val = max(val, min_value(successor, alpha, beta, depth));
+            cout << val._value << endl;
             if (val >= beta) return val;
             alpha = max(alpha, val);
         }
@@ -109,7 +110,7 @@ private :
         return timeDifference >= this->timeLimit;
     }
 
-    value eval(state* s) {
+    value eval(state*& s) {
         return value(s->getValue(), s);
     }
 };
