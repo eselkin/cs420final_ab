@@ -55,13 +55,13 @@ private :
         value val(0.0, s);
         chrono::microseconds cycle_duration = chrono::microseconds(0);
         chrono::microseconds total_duration = chrono::microseconds(0);
-        while(MAX_DEPTH < 10 && (cycle_duration + total_duration < timeLimit) ) {
+        while(MAX_DEPTH < 15 && (cycle_duration + total_duration < timeLimit) ) {
             int depth = 1;
             total_duration += cycle_duration;
             auto cycle_time = chrono::high_resolution_clock::now(); // actually evaluate beginning time
             value alpha(numeric_limits<double>::lowest(), nullptr);
             value beta(numeric_limits<double>::max(), nullptr);
-            val = max(val, max_value(val._state, alpha, beta, depth));
+            val = max_value(s, alpha, beta, depth);
             cycle_duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now()-cycle_time);
             MAX_DEPTH++;
             cout << *(val._state);
