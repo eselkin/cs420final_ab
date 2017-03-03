@@ -127,9 +127,10 @@ string state::getStringFromRow(char* row){
 priority_queue<state *, vector<state *>, state::less_comp > &
 state::getOrderedSuccessorsMin(vector<regex> orderOfSuccession) {
     this->successorsMin = new priority_queue<state*, vector<state*>, state::less_comp >();
-    swap(orderOfSuccession[0], orderOfSuccession[1]);
-    swap(orderOfSuccession[2], orderOfSuccession[3]);
+    swap(orderOfSuccession[0], orderOfSuccession[2]);
+    swap(orderOfSuccession[1], orderOfSuccession[3]);
     swap(orderOfSuccession[4], orderOfSuccession[5]);
+    swap(orderOfSuccession[6], orderOfSuccession[7]);
     this->operateOrderOfSuccession(orderOfSuccession, this->successorsMin, false, 'O');
     return *(this->successorsMin);
 }
@@ -157,20 +158,14 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
             string rowTemp(row);
             if (regex_search(rowTemp, matcher, expression)) {
                 int pos;
-                if (matcher[1].length() == 0) {
-                    pos = (int) matcher.prefix().length() + (int) matcher[0].length();
-                } else {
-                    pos = (int) matcher.prefix().length()+1;
-                }
+                pos = (int) matcher.prefix().length() + (int)matcher[0].str().find("-");
+                cout << rowTemp[pos] << char(i+'A') << " :: " << pos << endl;
                 state *successor_state = new state(this->board, this->d);
-                successor_state->makeMove((char)(i + 'A'), pos, typeChar);
+                successor_state->makeMove((char)(i + 'A'), pos+1, typeChar);
                 if (matcher[0].length() == 4) {
                     successor_state->setValue(isMax? 1:-1);
                 } else if (matcher[0].length() == 3) {
-                    if (isMax && matcher[0].str().find("O") != string::npos)
-                        successor_state->setValue(1.0);
-                    else
-                        successor_state->setValue(isMax? .75:-.75);
+                    successor_state->setValue(isMax? .75:-.75);
                 } else if (matcher[0].length() == 2) {
                     successor_state->setValue(isMax? .5:-.5);
                 }
@@ -179,24 +174,15 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
             string rowTempTranspose(transposeRow);
             if (regex_search(rowTempTranspose, matcher2, expression)) {
                 int pos;
-                pos = matcher2[1].length() == 0 ? (int) matcher2.prefix().length() + (int) matcher2[0].length()-1 : (int) matcher2.prefix().length();
+                pos = (int) matcher2.prefix().length() + (int)matcher2[0].str().find("-");
+                cout << rowTempTranspose[pos] << char(pos+'A') << ":"  << i+1 << endl;
                 // this means a column i has a killer move and row pos
                 state *successor_state = new state(this->board, this->d);
-
-                cout << "MAKE MOVE: " << successor_state->makeMove((char) (pos + 'A'), i+1, typeChar) << " with: " << typeChar << endl;
-                if (matcher[0].length() == 4) {
+                successor_state->makeMove((char) (pos + 'A'), i+1, typeChar);
+                if (matcher2[0].length() == 4) {
                     successor_state->setValue(isMax? 1:-1);
                 } else if (matcher2[0].length() == 3) {
-                    if (isMax && matcher2[0].str().find("O") != string::npos) {
-                        successor_state->setValue(1.1);
-                        cout << "block" << endl;
-                        cout << *successor_state << endl;
-                    }
-                    else {
-                        cout << "adding: " << endl;
-                        cout << *successor_state << endl;
-                        successor_state->setValue(isMax ? .75 : -.75);
-                    }
+                    successor_state->setValue(isMax? .75:-.75);
                 } else if (matcher2[0].length() == 2) {
                     successor_state->setValue(isMax? .5:-.5);
                 }

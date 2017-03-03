@@ -12,6 +12,7 @@ typedef pair<char, int> action;
 
 int main(int argc, char *argv[])
 {
+    srand(time(NULL));
     //test_state(BOARD_SIZE);
     state *game = new state();
     int timeLimit;
@@ -25,9 +26,11 @@ int main(int argc, char *argv[])
     cout << *game;
     vector<regex>* orderOfSuccession = new vector<regex>();
     orderOfSuccession->push_back(regex("(-)(?:XXX)|(?:XXX)(-)")); // win
+    orderOfSuccession->push_back(regex("(?:XX)(-)(?:X)|(?:X)(-)(?:XX)")); // win
     orderOfSuccession->push_back(regex("(-)(?:OOO)|(?:OOO)(-)")); // block win
-    orderOfSuccession->push_back(regex("(-)(?:XX)|(?:XX)(-)")); // improve chance of winning
-    orderOfSuccession->push_back(regex("(-)(?:OO)|(?:OO)(-)")); // further reduce chance of losing
+    orderOfSuccession->push_back(regex("(?:OO)(-)(?:O)|(?:O)(-)(?:OO)")); // block win
+    orderOfSuccession->push_back(regex("(-)(?:XX)|(?:XX)(-)|(?:X)(-)(?:X)")); // improve chance of winning
+    orderOfSuccession->push_back(regex("(-)(?:OO)|(?:OO)(-)|(?:O)(-)(?:O)")); // further reduce chance of losing
     orderOfSuccession->push_back(regex("(-)(?:X)|(?:X)(-)"));
     orderOfSuccession->push_back(regex("(-)(?:O)|(?:O)(-)"));
 
@@ -37,23 +40,27 @@ int main(int argc, char *argv[])
     //        prompt("Enter your move? ", move);
     //    }
     //    action act = *validate(move, game, BOARD_SIZE);
-    game->makeMove('D', 5, 'O');
-    game->makeMove('D', 4, 'X');
-    game->makeMove('E', 5, 'O');
-    game->makeMove('C', 5, 'X');
-    game->makeMove('C', 4, 'O');
-    game->makeMove('F', 5, 'X');
-    game->makeMove('E', 4, 'O');
     game->makeMove('E', 3, 'X');
-    game->makeMove('F', 4, 'O');
-    game->makeMove('G', 4, 'X');
-    game->makeMove('C', 3, 'O');
+    game->makeMove('E', 4, 'O');
+    game->makeMove('D', 4, 'X');
+    game->makeMove('D', 3, 'O');
+    game->makeMove('F', 4, 'X');
+    game->makeMove('E', 5, 'O');
     game->makeMove('E', 6, 'X');
-    game->makeMove('C', 2, 'O');
-    game->makeMove('C', 1, 'X');
-    game->makeMove('F', 2, 'O');
-    game->makeMove('G', 3, 'X');
-    game->makeMove('D', 2, 'O');
+    game->makeMove('D', 5, 'O');
+    game->makeMove('C', 5, 'X');
+    game->makeMove('F', 5, 'O');
+    game->makeMove('G', 5, 'X');
+    game->makeMove('D', 6, 'O');
+    game->makeMove('D', 7, 'X');
+    game->makeMove('C', 6, 'O');
+    game->makeMove('B', 6, 'X');
+    game->makeMove('F', 6, 'O');
+    game->makeMove('F', 7, 'X');
+    game->makeMove('H', 2, 'O');
+    game->makeMove('E', 7, 'X');
+    game->makeMove('F', 3, 'O'); // our game moves to C7 and wins!
+
 //    game->makeMove('F', 5, 'X');
 //    game->makeMove('E', 5, 'O');
 //    game->makeMove('E', 4, 'X');

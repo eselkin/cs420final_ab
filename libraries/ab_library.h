@@ -64,7 +64,6 @@ private :
             val = max_value(s, alpha, beta, depth);
             cycle_duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now()-cycle_time);
             MAX_DEPTH++;
-            cout << *(val._state);
         }
         return val._state->getActionTakenToGetHere();
     }
@@ -79,7 +78,6 @@ private :
             state* successor = pq.top();
             pq.pop();
             val = max(val, min_value(successor, alpha, beta, depth));
-            cout << val._value << endl;
             if (val >= beta) return val;
             alpha = max(alpha, val);
         }
