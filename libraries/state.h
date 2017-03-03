@@ -9,6 +9,7 @@
 #include <vector>
 #include <regex>
 #include <queue>
+#include <cmath>
 
 using namespace std;
 typedef pair<char, int> action;
@@ -55,6 +56,9 @@ public:
 
     template <typename T>
     void operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_queue<state *, vector<state *>, T>*& pq, bool isMax, char typeChar);
+    inline bool isEqual(const double &a, const double &b){
+        return fabs(a-b) < 0.001;
+    }
 
 };
 
@@ -131,6 +135,7 @@ state::getOrderedSuccessorsMin(vector<regex> orderOfSuccession) {
     swap(orderOfSuccession[1], orderOfSuccession[3]);
     swap(orderOfSuccession[4], orderOfSuccession[5]);
     swap(orderOfSuccession[6], orderOfSuccession[7]);
+    swap(orderOfSuccession[8], orderOfSuccession[9]);
     this->operateOrderOfSuccession(orderOfSuccession, this->successorsMin, false, 'O');
     return *(this->successorsMin);
 }
@@ -149,6 +154,12 @@ char** transpose(char **board, int d) {
 template <typename T>
 void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_queue<state*, vector<state*>, T>*& pq, bool isMax, char typeChar) {
     char **transpose_board = transpose(this->board, this->d);
+    state ***board_of_states = new state**[d]; // two dimensional array of state pointers! Crazy, I know
+    for (int i = 0; i < d; i++) {
+        board_of_states[i] = new state *[d]; // should be NULLs
+        for (int j = 0; j < d; j++)
+            board_of_states[i][j] = NULL;
+    }
     smatch matcher;
     smatch matcher2;
     for (regex expression : orderOfSuccession) {
@@ -159,37 +170,78 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
             if (regex_search(rowTemp, matcher, expression)) {
                 int pos;
                 pos = (int) matcher.prefix().length() + (int)matcher[0].str().find("-");
-                cout << rowTemp[pos] << char(i+'A') << " :: " << pos << endl;
+                cout << rowTemp[pos] << char(i+'A') << "--" << i << " :: " << pos+1 << endl;
                 state *successor_state = new state(this->board, this->d);
                 successor_state->makeMove((char)(i + 'A'), pos+1, typeChar);
                 if (matcher[0].length() == 4) {
-                    successor_state->setValue(isMax? 1:-1);
+                    if (matcher[0].str().find("-",size_t(pos)) != string::npos){
+                        successor_state->setValue(isMax? .8:-.8);
+                    } else {
+                        successor_state->setValue(isMax? 1:-1);
+                    }
                 } else if (matcher[0].length() == 3) {
                     successor_state->setValue(isMax? .75:-.75);
                 } else if (matcher[0].length() == 2) {
-                    successor_state->setValue(isMax? .5:-.5);
+                    successor_state->setValue(isMax? .4:-.4);
                 }
-                pq->push(successor_state);
+                cout << *successor_state << endl;
+
+                if (board_of_states[i][pos] != NULL) {
+                    if (i == 4 && pos == 4)
+                        cout << "E5" << endl;
+                    if (isEqual(successor_state->getValue(), 0.4) && isEqual(board_of_states[i][pos]->getValue(), 0.4)) {
+                        board_of_states[i][pos]->setValue(board_of_states[i][pos]->getValue()+(isMax?.34:-.34));
+                        cout << board_of_states[i][pos]->getActionTakenToGetHere().first << "__" << board_of_states[i][pos]->getActionTakenToGetHere().second << endl;
+                    }
+                } else {
+                    if (i == 4 && pos == 4)
+                        cout << "ADDING E5 MATCHER LEN:" << matcher[0].length() << endl;
+                    board_of_states[i][pos] = successor_state;
+
+                }
             }
             string rowTempTranspose(transposeRow);
             if (regex_search(rowTempTranspose, matcher2, expression)) {
                 int pos;
                 pos = (int) matcher2.prefix().length() + (int)matcher2[0].str().find("-");
-                cout << rowTempTranspose[pos] << char(pos+'A') << ":"  << i+1 << endl;
+                cout << rowTempTranspose[pos] << char(pos+'A')<< "-" << pos << ":"  << i+1 << endl;
                 // this means a column i has a killer move and row pos
                 state *successor_state = new state(this->board, this->d);
                 successor_state->makeMove((char) (pos + 'A'), i+1, typeChar);
                 if (matcher2[0].length() == 4) {
-                    successor_state->setValue(isMax? 1:-1);
+                    if (matcher2[0].str().find("-",size_t(pos)) != string::npos){
+                        successor_state->setValue(isMax? .8:-.8);
+                    } else {
+                        successor_state->setValue(isMax? 1:-1);
+                    }
                 } else if (matcher2[0].length() == 3) {
                     successor_state->setValue(isMax? .75:-.75);
                 } else if (matcher2[0].length() == 2) {
-                    successor_state->setValue(isMax? .5:-.5);
+                    successor_state->setValue(isMax? .4:-.4);
                 }
-                pq->push(successor_state);
+                cout << "COL" << endl;
+                cout << *successor_state << endl;
+                if (board_of_states[pos][i] != NULL) {
+                    if (pos == 4 && i == 4)
+                        cout << "E5 TWO" << endl;
+                    if (isEqual(successor_state->getValue(), 0.4) && isEqual(board_of_states[pos][i]->getValue(), 0.4)) {
+                        board_of_states[pos][i]->setValue(board_of_states[pos][i]->getValue()+(isMax?.34:-.34));
+                        cout << board_of_states[pos][i]->getActionTakenToGetHere().first << "_+_" << board_of_states[pos][i]->getActionTakenToGetHere().second << endl;
+                    }
+                } else {
+                    if (i == 4 && pos == 4)
+                        cout << "ADDING E5 TWO LEN:" << matcher2[0].length() << endl;
+                    board_of_states[pos][i] = successor_state;
+                }
             }
         }
-
+    }
+    for (int i = 0; i < d; i++) {
+        for (int j = 0; j < d; j++) {
+            if (board_of_states[i][j] != NULL){
+                pq->push(board_of_states[i][j]);
+            }
+        }
     }
     if (pq->empty()) { // if there was nothing else on the board then push back a random
         state *random_successor = new state(this->board, this->d);
@@ -230,6 +282,8 @@ ostream& operator<<(ostream& stream, const state& s) {
     }
     return stream;
 }
+
+
 
 double state::getValue() const {
     return this->value;
