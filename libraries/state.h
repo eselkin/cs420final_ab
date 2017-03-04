@@ -136,6 +136,8 @@ state::getOrderedSuccessorsMin(vector<regex> orderOfSuccession) {
     swap(orderOfSuccession[4], orderOfSuccession[5]);
     swap(orderOfSuccession[6], orderOfSuccession[7]);
     swap(orderOfSuccession[8], orderOfSuccession[9]);
+    swap(orderOfSuccession[10], orderOfSuccession[11]);
+    swap(orderOfSuccession[12], orderOfSuccession[13]);
     this->operateOrderOfSuccession(orderOfSuccession, this->successorsMin, false, 'O');
     return *(this->successorsMin);
 }
@@ -187,21 +189,22 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                     pos += dashes[0];
                     if (matcher[0].str().length() == 4) {
                         if (matcher[0].str().find("-", size_t(pos)) != string::npos) {
-                            successor_state->setValue(isMax ? .8 : -.8);
+                            successor_state->setValue(isMax ? 1.2 : -1.8);
                         } else {
-                            successor_state->setValue(isMax ? 1.1 : -1.1);
+                            successor_state->setValue(isMax ? 1.5 : -1.9);
                         }
                     } else if (matcher[0].str().length() == 3) {
                         successor_state->setValue(isMax ? .75 : -.75);
                     } else if (matcher[0].str().length() == 2) {
-                        successor_state->setValue(isMax ? .4 : -.4);
+                        successor_state->setValue(isMax ? .40 : -.40);
                     }
                 }
                 successor_state->makeMove((char) (i + 'A'), pos+1, typeChar);
                 cout << "ROW MATCH..." << char(i+'A') << ":" << pos+1 << " [" << matcher[0].str() << "]" << endl;
                 cout << *successor_state << endl;
                 if (board_of_states[i][pos] != NULL) {
-                    board_of_states[i][pos]->setValue(board_of_states[i][pos]->getValue() + successor_state->getValue());
+                    cout << "there is a another move here and is X=" << isMax << endl;
+                    board_of_states[i][pos]->setValue(board_of_states[i][pos]->getValue() + 0.5*successor_state->getValue());
                 } else {
                     board_of_states[i][pos] = successor_state;
                 }
@@ -230,9 +233,9 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                     pos = pos + dashes[0];
                     if (matcher2[0].str().length() == 4) {
                         if (matcher2[0].str().find("-", size_t(pos)) != string::npos) {
-                            successor_state->setValue(isMax ? .8 : -.8);
+                            successor_state->setValue(isMax ? 1.2 : -1.8);
                         } else {
-                            successor_state->setValue(isMax ? 1.1 : -1.1);
+                            successor_state->setValue(isMax ? 1.8 : -1.3);
                         }
                     } else if (matcher2[0].str().length() == 3) {
                         successor_state->setValue(isMax ? .75 : -.75);
@@ -244,7 +247,9 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                 cout << "COL MATCH..." << char(pos + 'A') << ":" << i+1 << "[" << matcher2[0].str() << "]" << endl;
                 cout << *successor_state << endl;
                 if (board_of_states[pos][i] != NULL) {
-                    board_of_states[pos][i]->setValue(board_of_states[pos][i]->getValue() + successor_state->getValue());
+                    cout << "COL there is a another move here and is X=" << isMax << endl;
+                    cout << *board_of_states[pos][i] << endl;
+                    board_of_states[pos][i]->setValue(board_of_states[pos][i]->getValue() + 0.5*successor_state->getValue());
                 } else {
                     board_of_states[pos][i] = successor_state;
                 }
