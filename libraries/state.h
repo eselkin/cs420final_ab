@@ -168,69 +168,84 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
             string row = getStringFromRow(this->board[i]);
             string rowTemp(row);
             if (regex_search(rowTemp, matcher, expression)) {
-                int pos;
-                pos = (int) matcher.prefix().length() + (int)matcher[0].str().find("-");
-                cout << rowTemp[pos] << char(i+'A') << "--" << i << " :: " << pos+1 << endl;
+                size_t pos;
+                vector<size_t> dashes;
+                dashes.push_back(matcher[0].str().find("-"));
+                pos = size_t(matcher.prefix().length());
                 state *successor_state = new state(this->board, this->d);
-                successor_state->makeMove((char)(i + 'A'), pos+1, typeChar);
-                if (matcher[0].length() == 4) {
-                    if (matcher[0].str().find("-",size_t(pos)) != string::npos){
-                        successor_state->setValue(isMax? .8:-.8);
-                    } else {
-                        successor_state->setValue(isMax? 1:-1);
-                    }
-                } else if (matcher[0].length() == 3) {
-                    successor_state->setValue(isMax? .75:-.75);
-                } else if (matcher[0].length() == 2) {
-                    successor_state->setValue(isMax? .4:-.4);
-                }
-                cout << *successor_state << endl;
 
-                if (board_of_states[i][pos] != NULL) {
-                    if (i == 4 && pos == 4)
-                        cout << "E5" << endl;
-                    if (isEqual(successor_state->getValue(), 0.4) && isEqual(board_of_states[i][pos]->getValue(), 0.4)) {
-                        board_of_states[i][pos]->setValue(board_of_states[i][pos]->getValue()+(isMax?.34:-.34));
-                        cout << board_of_states[i][pos]->getActionTakenToGetHere().first << "__" << board_of_states[i][pos]->getActionTakenToGetHere().second << endl;
+                if (matcher[0].str().length() == 5) {
+                    size_t dash2 = matcher[0].str().find("-", dashes[0]);
+                    size_t dash3 = matcher[0].str().find("-", dash2);
+                    if (dash2 != string::npos) {
+                        dashes.push_back(dash2);
+                        if (dash3 != string::npos)
+                            dashes.push_back(dash3);
                     }
+                    pos += dashes[rand()%size_t(dashes.size())];
                 } else {
-                    if (i == 4 && pos == 4)
-                        cout << "ADDING E5 MATCHER LEN:" << matcher[0].length() << endl;
+                    pos += dashes[0];
+                    if (matcher[0].str().length() == 4) {
+                        if (matcher[0].str().find("-", size_t(pos)) != string::npos) {
+                            successor_state->setValue(isMax ? .8 : -.8);
+                        } else {
+                            successor_state->setValue(isMax ? 1.1 : -1.1);
+                        }
+                    } else if (matcher[0].str().length() == 3) {
+                        successor_state->setValue(isMax ? .75 : -.75);
+                    } else if (matcher[0].str().length() == 2) {
+                        successor_state->setValue(isMax ? .4 : -.4);
+                    }
+                }
+                successor_state->makeMove((char) (i + 'A'), pos+1, typeChar);
+                cout << "ROW MATCH..." << char(i+'A') << ":" << pos+1 << " [" << matcher[0].str() << "]" << endl;
+                cout << *successor_state << endl;
+                if (board_of_states[i][pos] != NULL) {
+                    board_of_states[i][pos]->setValue(board_of_states[i][pos]->getValue() + successor_state->getValue());
+                } else {
                     board_of_states[i][pos] = successor_state;
-
                 }
             }
             string rowTempTranspose(transposeRow);
             if (regex_search(rowTempTranspose, matcher2, expression)) {
-                int pos;
-                pos = (int) matcher2.prefix().length() + (int)matcher2[0].str().find("-");
-                cout << rowTempTranspose[pos] << char(pos+'A')<< "-" << pos << ":"  << i+1 << endl;
+                size_t pos;
+                vector<size_t> dashes;
+                dashes.push_back(matcher2[0].str().find("-"));
+                pos = size_t(matcher2.prefix().length());
                 // this means a column i has a killer move and row pos
                 state *successor_state = new state(this->board, this->d);
-                successor_state->makeMove((char) (pos + 'A'), i+1, typeChar);
-                if (matcher2[0].length() == 4) {
-                    if (matcher2[0].str().find("-",size_t(pos)) != string::npos){
-                        successor_state->setValue(isMax? .8:-.8);
-                    } else {
-                        successor_state->setValue(isMax? 1:-1);
+
+                if (matcher2[0].str().length() == 5) {
+                    // we have one of the larger picture situations
+                    // pos may change
+                    size_t dash2 = matcher[0].str().find("-", dashes[0]);
+                    size_t dash3 = matcher[0].str().find("-", dash2);
+                    if (dash2 != string::npos) {
+                        dashes.push_back(dash2);
+                        if (dash3 != string::npos)
+                            dashes.push_back(dash3);
                     }
-                } else if (matcher2[0].length() == 3) {
-                    successor_state->setValue(isMax? .75:-.75);
-                } else if (matcher2[0].length() == 2) {
-                    successor_state->setValue(isMax? .4:-.4);
+                    pos += dashes[rand()%size_t(dashes.size())];
+                } else {
+                    pos = pos + dashes[0];
+                    if (matcher2[0].str().length() == 4) {
+                        if (matcher2[0].str().find("-", size_t(pos)) != string::npos) {
+                            successor_state->setValue(isMax ? .8 : -.8);
+                        } else {
+                            successor_state->setValue(isMax ? 1.1 : -1.1);
+                        }
+                    } else if (matcher2[0].str().length() == 3) {
+                        successor_state->setValue(isMax ? .75 : -.75);
+                    } else if (matcher2[0].str().length() == 2) {
+                        successor_state->setValue(isMax ? .4 : -.4);
+                    }
                 }
-                cout << "COL" << endl;
+                successor_state->makeMove((char) (pos + 'A'), i+1, typeChar);
+                cout << "COL MATCH..." << char(pos + 'A') << ":" << i+1 << "[" << matcher2[0].str() << "]" << endl;
                 cout << *successor_state << endl;
                 if (board_of_states[pos][i] != NULL) {
-                    if (pos == 4 && i == 4)
-                        cout << "E5 TWO" << endl;
-                    if (isEqual(successor_state->getValue(), 0.4) && isEqual(board_of_states[pos][i]->getValue(), 0.4)) {
-                        board_of_states[pos][i]->setValue(board_of_states[pos][i]->getValue()+(isMax?.34:-.34));
-                        cout << board_of_states[pos][i]->getActionTakenToGetHere().first << "_+_" << board_of_states[pos][i]->getActionTakenToGetHere().second << endl;
-                    }
+                    board_of_states[pos][i]->setValue(board_of_states[pos][i]->getValue() + successor_state->getValue());
                 } else {
-                    if (i == 4 && pos == 4)
-                        cout << "ADDING E5 TWO LEN:" << matcher2[0].length() << endl;
                     board_of_states[pos][i] = successor_state;
                 }
             }
