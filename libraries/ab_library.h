@@ -29,8 +29,6 @@ public:
         this->bestAction = ab_search(s);
         cout << bestAction.first << " + " << bestAction.second << endl << endl;
         s->makeMove(this->bestAction.first, this->bestAction.second, 'X');
-        win = new regex("XXXX");
-        loss = new regex("OOOO");
     }
 
     value max(const value &a, const value &b) {
@@ -55,7 +53,7 @@ private :
         value val(0.0, s);
         chrono::microseconds cycle_duration = chrono::microseconds(0);
         chrono::microseconds total_duration = chrono::microseconds(0);
-        while(MAX_DEPTH < 6 && (cycle_duration + total_duration < timeLimit) ) {
+        while(MAX_DEPTH < 100 && (cycle_duration + total_duration < timeLimit) ) {
             int depth = 1;
             total_duration += cycle_duration;
             auto cycle_time = chrono::high_resolution_clock::now(); // actually evaluate beginning time

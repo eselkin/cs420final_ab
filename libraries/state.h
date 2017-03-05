@@ -32,6 +32,7 @@ private:
     double value;                               // why calculate these things twice?
     action takenToGetHere;                      // No need to keep track of parent just the move so the parent knows
     state* parent;
+    int charsRemaining;                         // Spaces left?
     priority_queue<state*, vector<state*>, state::greater_comp >* successorsMax;
     priority_queue<state*, vector<state*>, state::less_comp >* successorsMin;
     // Ordered list of successors TODO Not sure if we need this I think we should have to generate this every time we come to a state
@@ -39,7 +40,7 @@ private:
 public:
 
     state(int dimension = 8);                   // constructor
-    state(char** fromBoard, int dimension = 8);
+    state(char** fromBoard, int charsRemaining, int dimension = 8);
     state(const state &original);               // copy constructor
     ~state();                                   // destructor
     char** getBoard() const;                    // accessor for board
@@ -48,6 +49,7 @@ public:
     void setValue(double value);
     bool makeMove(char r, int c, char typeChar);// success|failure
     action getActionTakenToGetHere();
+    bool isOver();
     priority_queue<state*, vector<state*>, greater_comp>& getOrderedSuccessorsMax(vector<regex> orderOfSuccession);
     priority_queue<state*, vector<state*>, less_comp>& getOrderedSuccessorsMin(vector<regex> orderOfSuccession);
 
@@ -56,9 +58,6 @@ public:
 
     template <typename T>
     void operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_queue<state *, vector<state *>, T>*& pq, bool isMax, char typeChar);
-    inline bool isEqual(const double &a, const double &b){
-        return fabs(a-b) < 0.001;
-    }
 
 };
 
@@ -74,15 +73,17 @@ state::state(int dimension) {
             this->board[i][j] = '-'; // empty
         }
     }
+    this->charsRemaining = d*d;
 }
 
 // convenience constructor to set up a board from a 2-dimensional array
-state::state(char** fromBoard, int dimension) : state(dimension) {
+state::state(char** fromBoard, int charsRemaining, int dimension) : state(dimension) {
     for (int i = 0; i < this->d; i++) {
         for (int j = 0; j < this->d; j++) {
             this->board[i][j] = fromBoard[i][j];
         }
     }
+    this->charsRemaining = charsRemaining;
 }
 
 // copy constructor
@@ -115,6 +116,7 @@ int state::getDimension() const {
 // ternary move returns true if move was made, false otherwise... except in the off chance your typeChar is 0
 bool state::makeMove(char r, int c, char typeChar) {
     if (this->board[r-'A'][c-1] == '-') {
+        this->charsRemaining--;
         this->takenToGetHere = action(r, c);
         this->board[r-'A'][c-1] = typeChar;
         return true;
@@ -127,20 +129,6 @@ string state::getStringFromRow(char* row){
     return string(row, this->d);
 }
 
-
-priority_queue<state *, vector<state *>, state::less_comp > &
-state::getOrderedSuccessorsMin(vector<regex> orderOfSuccession) {
-    this->successorsMin = new priority_queue<state*, vector<state*>, state::less_comp >();
-    swap(orderOfSuccession[0], orderOfSuccession[2]);
-    swap(orderOfSuccession[1], orderOfSuccession[3]);
-    swap(orderOfSuccession[4], orderOfSuccession[5]);
-    swap(orderOfSuccession[6], orderOfSuccession[7]);
-    swap(orderOfSuccession[8], orderOfSuccession[9]);
-    swap(orderOfSuccession[10], orderOfSuccession[11]);
-    swap(orderOfSuccession[12], orderOfSuccession[13]);
-    this->operateOrderOfSuccession(orderOfSuccession, this->successorsMin, false, 'O');
-    return *(this->successorsMin);
-}
 
 char** transpose(char **board, int d) {
     char **transpose_board = new char *[d];
@@ -174,7 +162,7 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                 vector<size_t> dashes;
                 dashes.push_back(matcher[0].str().find("-"));
                 pos = size_t(matcher.prefix().length());
-                state *successor_state = new state(this->board, this->d);
+                state *successor_state = new state(this->board, this->charsRemaining, this->d);
 
                 if (matcher[0].str().length() == 5) {
                     size_t dash2 = matcher[0].str().find("-", dashes[0]);
@@ -185,13 +173,14 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                             dashes.push_back(dash3);
                     }
                     pos += dashes[rand()%size_t(dashes.size())];
+                    successor_state->setValue(isMax?.75:-0.75);
                 } else {
                     pos += dashes[0];
                     if (matcher[0].str().length() == 4) {
-                        if (matcher[0].str().find("-", size_t(pos)) != string::npos) {
-                            successor_state->setValue(isMax ? 1.2 : -1.8);
+                        if (matcher[0].str().find("-", pos) != string::npos) {
+                            successor_state->setValue(isMax ? 1.5 : -1.5    ); // this creates a bias toward avoiding loss
                         } else {
-                            successor_state->setValue(isMax ? 1.5 : -1.9);
+                            successor_state->setValue(isMax ? 2 : -2.2);
                         }
                     } else if (matcher[0].str().length() == 3) {
                         successor_state->setValue(isMax ? .75 : -.75);
@@ -200,11 +189,8 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                     }
                 }
                 successor_state->makeMove((char) (i + 'A'), pos+1, typeChar);
-                cout << "ROW MATCH..." << char(i+'A') << ":" << pos+1 << " [" << matcher[0].str() << "]" << endl;
-                cout << *successor_state << endl;
                 if (board_of_states[i][pos] != NULL) {
-                    cout << "there is a another move here and is X=" << isMax << endl;
-                    board_of_states[i][pos]->setValue(board_of_states[i][pos]->getValue() + 0.5*successor_state->getValue());
+                    board_of_states[i][pos]->setValue(board_of_states[i][pos]->getValue() + 0.4*successor_state->getValue());
                 } else {
                     board_of_states[i][pos] = successor_state;
                 }
@@ -216,7 +202,7 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                 dashes.push_back(matcher2[0].str().find("-"));
                 pos = size_t(matcher2.prefix().length());
                 // this means a column i has a killer move and row pos
-                state *successor_state = new state(this->board, this->d);
+                state *successor_state = new state(this->board, this->charsRemaining, this->d);
 
                 if (matcher2[0].str().length() == 5) {
                     // we have one of the larger picture situations
@@ -229,13 +215,14 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                             dashes.push_back(dash3);
                     }
                     pos += dashes[rand()%size_t(dashes.size())];
+                    successor_state->setValue(isMax?.75:-0.75);
                 } else {
                     pos = pos + dashes[0];
                     if (matcher2[0].str().length() == 4) {
                         if (matcher2[0].str().find("-", size_t(pos)) != string::npos) {
-                            successor_state->setValue(isMax ? 1.2 : -1.8);
+                            successor_state->setValue(isMax ? 1.5 : -1.5); // avoid losses
                         } else {
-                            successor_state->setValue(isMax ? 1.8 : -1.3);
+                            successor_state->setValue(isMax ? 2 : -2.2); //
                         }
                     } else if (matcher2[0].str().length() == 3) {
                         successor_state->setValue(isMax ? .75 : -.75);
@@ -244,12 +231,8 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                     }
                 }
                 successor_state->makeMove((char) (pos + 'A'), i+1, typeChar);
-                cout << "COL MATCH..." << char(pos + 'A') << ":" << i+1 << "[" << matcher2[0].str() << "]" << endl;
-                cout << *successor_state << endl;
                 if (board_of_states[pos][i] != NULL) {
-                    cout << "COL there is a another move here and is X=" << isMax << endl;
-                    cout << *board_of_states[pos][i] << endl;
-                    board_of_states[pos][i]->setValue(board_of_states[pos][i]->getValue() + 0.5*successor_state->getValue());
+                    board_of_states[pos][i]->setValue(board_of_states[pos][i]->getValue() + 0.4*successor_state->getValue());
                 } else {
                     board_of_states[pos][i] = successor_state;
                 }
@@ -263,9 +246,27 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
             }
         }
     }
-    if (pq->empty()) { // if there was nothing else on the board then push back a random
-        state *random_successor = new state(this->board, this->d);
-        while (!random_successor->makeMove((char) ('A'+((rand() % (this->d-4))+3)), (rand() % (this->d-6))+3+1, typeChar));
+    if (this->charsRemaining == 0) {
+        return;
+    }
+    else if (pq->empty() && this->charsRemaining <= (this->d*this->d)/2) {
+        vector<action> actionsLeft;
+        // find all actions remaining
+        for (int i = 0; i < d; i++) {
+            for (int j = 0; j < d; j++){
+                if (this->board[i][j] == '-') {
+                    actionsLeft.push_back(action(i+'A',j+1));
+                }
+            }
+        }
+        state *random_successor = new state(this->board, this->charsRemaining, this->d);
+        action randomAction = actionsLeft[rand()%actionsLeft.size()];
+        random_successor->makeMove(randomAction.first, randomAction.second, typeChar);
+        random_successor->setValue(isMax? 0.25 : -0.25);
+        pq->push(random_successor);
+    } else if (pq->empty()) { // if there was nothing else on the board then push back a random
+        state *random_successor = new state(this->board, this->charsRemaining, this->d);
+        while (!random_successor->makeMove((char) ('A'+((rand() % (this->d-6))+5)), (rand() % (this->d-6))+4, typeChar));
         random_successor->setValue(isMax? 0.25 : -0.25);
         pq->push(random_successor);
     }
@@ -279,6 +280,23 @@ priority_queue<state*, vector<state*>, state::greater_comp>& state::getOrderedSu
 
     return *(this->successorsMax);
 }
+
+
+priority_queue<state *, vector<state *>, state::less_comp > &
+state::getOrderedSuccessorsMin(vector<regex> orderOfSuccession) {
+    this->successorsMin = new priority_queue<state*, vector<state*>, state::less_comp >();
+    swap(orderOfSuccession[0], orderOfSuccession[2]);
+    swap(orderOfSuccession[1], orderOfSuccession[3]);
+    swap(orderOfSuccession[4], orderOfSuccession[5]);
+    swap(orderOfSuccession[6], orderOfSuccession[7]);
+    swap(orderOfSuccession[8], orderOfSuccession[9]);
+    swap(orderOfSuccession[10], orderOfSuccession[11]);
+    swap(orderOfSuccession[12], orderOfSuccession[13]);
+    swap(orderOfSuccession[14], orderOfSuccession[15]);
+    this->operateOrderOfSuccession(orderOfSuccession, this->successorsMin, false, 'O');
+    return *(this->successorsMin);
+}
+
 
 action state::getActionTakenToGetHere() {
     return this->takenToGetHere;
@@ -313,6 +331,9 @@ void state::setValue(double value) {
     this->value = value;
 }
 
+bool state::isOver() {
+    return false;
+}
 
 
 #endif // STATE_H
