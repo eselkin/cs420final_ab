@@ -13,7 +13,7 @@
 
 using namespace std;
 typedef pair<char, int> action;
-
+int chooseClosestToChar(string matched, vector<size_t> dash_positions);
 
 class state {
 public:
@@ -164,33 +164,53 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                 pos = size_t(matcher.prefix().length());
                 state *successor_state = new state(this->board, this->charsRemaining, this->d);
 
-                if (matcher[0].str().length() == 5) {
+                if (matcher[0].str().length() == 5) { // --X-- -XXX-
                     size_t dash2 = matcher[0].str().find("-", dashes[0]);
                     size_t dash3 = matcher[0].str().find("-", dash2);
+                    size_t dash4 = matcher[0].str().find("-", dash3);
                     if (dash2 != string::npos) {
                         dashes.push_back(dash2);
-                        if (dash3 != string::npos)
+                        if (dash3 != string::npos) {
                             dashes.push_back(dash3);
+                            if (dash4 != string::npos) {
+                                dashes.push_back(dash4);
+                                successor_state->setValue(isMax ? .1 : -.1);
+                            } else {
+                                successor_state->setValue(isMax?1.5:-1.5);
+                            }
+                        } else {
+                            successor_state->setValue(isMax?1.75:-1.75);
+                        }
+                    } else {
+                        // shouldn't get here!
+                        successor_state->setValue(isMax?2:-2.);
                     }
-                    pos += dashes[rand()%size_t(dashes.size())];
-                    successor_state->setValue(isMax?.75:-0.75);
+                    pos += dashes[chooseClosestToChar(matcher[0], dashes)];
                 } else {
                     pos += dashes[0];
                     if (matcher[0].str().length() == 4) {
                         if (matcher[0].str().find("-", pos) != string::npos) {
                             successor_state->setValue(isMax ? 1.5 : -1.5    ); // this creates a bias toward avoiding loss
                         } else {
-                            successor_state->setValue(isMax ? 2 : -2.2);
+                            successor_state->setValue(isMax ? 1.5 : -1.75);
                         }
                     } else if (matcher[0].str().length() == 3) {
-                        successor_state->setValue(isMax ? .75 : -.75);
+                        successor_state->setValue(isMax ? 1. : -1.75);
                     } else if (matcher[0].str().length() == 2) {
-                        successor_state->setValue(isMax ? .40 : -.40);
+                        if (successor_state->charsRemaining >= ( d * d )- 2 ){
+                            successor_state->setValue(isMax? 1.25 : -1.5);
+                        } else {
+                            successor_state->setValue(isMax ? 1 : -1.5);
+                        }
                     }
                 }
                 successor_state->makeMove((char) (i + 'A'), pos+1, typeChar);
                 if (board_of_states[i][pos] != NULL) {
-                    board_of_states[i][pos]->setValue(board_of_states[i][pos]->getValue() + 0.4*successor_state->getValue());
+                    if (i == 4 && pos == 4) {
+                        cout << "row" << endl;
+                        cout << *successor_state << endl;
+                    }
+                    board_of_states[i][pos]->setValue(board_of_states[i][pos]->getValue() + successor_state->getValue());
                 } else {
                     board_of_states[i][pos] = successor_state;
                 }
@@ -207,32 +227,52 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                 if (matcher2[0].str().length() == 5) {
                     // we have one of the larger picture situations
                     // pos may change
-                    size_t dash2 = matcher[0].str().find("-", dashes[0]);
-                    size_t dash3 = matcher[0].str().find("-", dash2);
+                    size_t dash2 = matcher2[0].str().find("-", dashes[0]);
+                    size_t dash3 = matcher2[0].str().find("-", dash2);
+                    size_t dash4 = matcher2[0].str().find("-", dash3);
                     if (dash2 != string::npos) {
                         dashes.push_back(dash2);
-                        if (dash3 != string::npos)
+                        if (dash3 != string::npos) {
                             dashes.push_back(dash3);
+                            if (dash4 != string::npos) {
+                                dashes.push_back(dash4);
+                                successor_state->setValue(isMax ? .1 : -.1);
+                            } else {
+                                successor_state->setValue(isMax?1.5:-1.5);
+                            }
+                        } else {
+                            successor_state->setValue(isMax?1.75:-1.75);
+                        }
+                    } else {
+                        // shouldn't get here!
+                        successor_state->setValue(isMax?2:-2.);
                     }
-                    pos += dashes[rand()%size_t(dashes.size())];
-                    successor_state->setValue(isMax?.75:-0.75);
+                    pos += dashes[chooseClosestToChar(matcher2[0], dashes)];
                 } else {
                     pos = pos + dashes[0];
                     if (matcher2[0].str().length() == 4) {
                         if (matcher2[0].str().find("-", size_t(pos)) != string::npos) {
                             successor_state->setValue(isMax ? 1.5 : -1.5); // avoid losses
                         } else {
-                            successor_state->setValue(isMax ? 2 : -2.2); //
+                            successor_state->setValue(isMax ? 1.5 : -1.75); //
                         }
                     } else if (matcher2[0].str().length() == 3) {
-                        successor_state->setValue(isMax ? .75 : -.75);
+                        successor_state->setValue(isMax ? 1. : -1.75);
                     } else if (matcher2[0].str().length() == 2) {
-                        successor_state->setValue(isMax ? .4 : -.4);
+                        if (successor_state->charsRemaining == ( d * d )- 1 ){
+                            successor_state->setValue(isMax? 1.2 : -1.5);
+                        } else {
+                            successor_state->setValue(isMax ? 1. : -1.5);
+                        }
                     }
                 }
                 successor_state->makeMove((char) (pos + 'A'), i+1, typeChar);
                 if (board_of_states[pos][i] != NULL) {
-                    board_of_states[pos][i]->setValue(board_of_states[pos][i]->getValue() + 0.4*successor_state->getValue());
+                    if (pos == 4 && i == 4) {
+                        cout << "col" << endl;
+                        cout << *successor_state << endl;
+                    }
+                    board_of_states[pos][i]->setValue(board_of_states[pos][i]->getValue() + successor_state->getValue());
                 } else {
                     board_of_states[pos][i] = successor_state;
                 }
@@ -266,12 +306,38 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
         pq->push(random_successor);
     } else if (pq->empty()) { // if there was nothing else on the board then push back a random
         state *random_successor = new state(this->board, this->charsRemaining, this->d);
-        while (!random_successor->makeMove((char) ('A'+((rand() % (this->d-6))+5)), (rand() % (this->d-6))+4, typeChar));
+        while (!random_successor->makeMove((char) ('A'+((rand() % (this->d-6))+4)), (rand() % (this->d-6))+4, typeChar));
         random_successor->setValue(isMax? 0.25 : -0.25);
         pq->push(random_successor);
     }
     return;
 };
+
+
+int chooseClosestToChar(string matched, vector<size_t> dash_positions) {
+    vector<size_t> distances;
+    size_t last_dash_pos = 0;
+    size_t largest_distance = 0;
+    int index_largest_distance = 0;
+    for (int i = 0; i < dash_positions.size(); i++) {
+        if (dash_positions[i]-last_dash_pos > largest_distance) {
+            index_largest_distance = i;
+        }
+    }
+    // largest_distance and largest_distance-1
+    if (index_largest_distance > 1) {
+        if (rand() % 1 == 0) {
+            return index_largest_distance - 1;
+        } else {
+            return index_largest_distance;
+        }
+    } else {
+        if (dash_positions.size() == 2) {
+            return 1;
+        }
+        return index_largest_distance;
+    }
+}
 
 // TODO XXX!!!!!
 priority_queue<state*, vector<state*>, state::greater_comp>& state::getOrderedSuccessorsMax(vector<regex> orderOfSuccession) {
@@ -283,17 +349,9 @@ priority_queue<state*, vector<state*>, state::greater_comp>& state::getOrderedSu
 
 
 priority_queue<state *, vector<state *>, state::less_comp > &
-state::getOrderedSuccessorsMin(vector<regex> orderOfSuccession) {
+state::getOrderedSuccessorsMin(vector<regex> minOrderOfSuccession) { // we're passed in the minOrderOfSuccession
     this->successorsMin = new priority_queue<state*, vector<state*>, state::less_comp >();
-    swap(orderOfSuccession[0], orderOfSuccession[2]);
-    swap(orderOfSuccession[1], orderOfSuccession[3]);
-    swap(orderOfSuccession[4], orderOfSuccession[5]);
-    swap(orderOfSuccession[6], orderOfSuccession[7]);
-    swap(orderOfSuccession[8], orderOfSuccession[9]);
-    swap(orderOfSuccession[10], orderOfSuccession[11]);
-    swap(orderOfSuccession[12], orderOfSuccession[13]);
-    swap(orderOfSuccession[14], orderOfSuccession[15]);
-    this->operateOrderOfSuccession(orderOfSuccession, this->successorsMin, false, 'O');
+    this->operateOrderOfSuccession(minOrderOfSuccession, this->successorsMin, false, 'O');
     return *(this->successorsMin);
 }
 

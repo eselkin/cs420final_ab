@@ -23,9 +23,10 @@ public:
     chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
 
     // constructor
-    A_B_SearchClass(state* &s, vector<regex>* orderOfSuccession, chrono::seconds timeLimit = chrono::seconds(30)) {
+    A_B_SearchClass(state* &s, vector<regex>* orderOfSuccession, vector<regex>* minOrderOfSuccession, chrono::seconds timeLimit = chrono::seconds(30)) {
         this->timeLimit = timeLimit;
         this->orderOfSuccession = orderOfSuccession;
+        this->minOrderOfSuccession = minOrderOfSuccession;
         this->bestAction = ab_search(s);
         cout << bestAction.first << " + " << bestAction.second << endl << endl;
         s->makeMove(this->bestAction.first, this->bestAction.second, 'X');
@@ -46,6 +47,7 @@ private :
     int MAX_DEPTH;
     action bestAction;
     vector<regex>* orderOfSuccession;
+    vector<regex>* minOrderOfSuccession;
     // the actual search begins here!
     action ab_search(state* s) {
         this->startTime = chrono::high_resolution_clock::now(); // actually evaluate beginning time
@@ -87,7 +89,7 @@ private :
         if (cutoff_test(s, depth)) return eval(s);
         value val(numeric_limits<double>::max(), s);
         priority_queue<state*, vector<state*>, state::less_comp> pq;
-        pq = s->getOrderedSuccessorsMin(*orderOfSuccession);
+        pq = s->getOrderedSuccessorsMin(*minOrderOfSuccession);
         while (!pq.empty()) {
             state* successor = pq.top();
             pq.pop();
