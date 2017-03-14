@@ -192,24 +192,20 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                         if (matcher[0].str().find("-", pos) != string::npos) {
                             successor_state->setValue(isMax ? 1.5 : -1.5    ); // this creates a bias toward avoiding loss
                         } else {
-                            successor_state->setValue(isMax ? 1.5 : -1.75);
+                            successor_state->setValue(isMax ? 1.75 : -2.5);
                         }
                     } else if (matcher[0].str().length() == 3) {
-                        successor_state->setValue(isMax ? 1. : -1.75);
+                        successor_state->setValue(isMax ? 1. : -2);
                     } else if (matcher[0].str().length() == 2) {
                         if (successor_state->charsRemaining >= ( d * d )- 2 ){
                             successor_state->setValue(isMax? 1.25 : -1.5);
                         } else {
-                            successor_state->setValue(isMax ? 1 : -1.5);
+                            successor_state->setValue(isMax ? .75 : -1.25);
                         }
                     }
                 }
                 successor_state->makeMove((char) (i + 'A'), pos+1, typeChar);
                 if (board_of_states[i][pos] != NULL) {
-                    if (i == 4 && pos == 4) {
-                        cout << "row" << endl;
-                        cout << *successor_state << endl;
-                    }
                     board_of_states[i][pos]->setValue(board_of_states[i][pos]->getValue() + successor_state->getValue());
                 } else {
                     board_of_states[i][pos] = successor_state;
@@ -254,24 +250,20 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                         if (matcher2[0].str().find("-", size_t(pos)) != string::npos) {
                             successor_state->setValue(isMax ? 1.5 : -1.5); // avoid losses
                         } else {
-                            successor_state->setValue(isMax ? 1.5 : -1.75); //
+                            successor_state->setValue(isMax ? 1.75 : -2.5); //
                         }
                     } else if (matcher2[0].str().length() == 3) {
-                        successor_state->setValue(isMax ? 1. : -1.75);
+                        successor_state->setValue(isMax ? 1. : -2);
                     } else if (matcher2[0].str().length() == 2) {
                         if (successor_state->charsRemaining == ( d * d )- 1 ){
                             successor_state->setValue(isMax? 1.2 : -1.5);
                         } else {
-                            successor_state->setValue(isMax ? 1. : -1.5);
+                            successor_state->setValue(isMax ? .75 : -1.25);
                         }
                     }
                 }
                 successor_state->makeMove((char) (pos + 'A'), i+1, typeChar);
                 if (board_of_states[pos][i] != NULL) {
-                    if (pos == 4 && i == 4) {
-                        cout << "col" << endl;
-                        cout << *successor_state << endl;
-                    }
                     board_of_states[pos][i]->setValue(board_of_states[pos][i]->getValue() + successor_state->getValue());
                 } else {
                     board_of_states[pos][i] = successor_state;
