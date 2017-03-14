@@ -37,22 +37,20 @@ int main(int argc, char *argv[])
     orderOfSuccession->push_back(regex("(?:O)(-)(?:OO)")); // block win
     orderOfSuccession->push_back(regex("(-)(?:X)(-)(?:X)(-)")); // improve chance of winning
     orderOfSuccession->push_back(regex("(-)(?:O)(-)(?:O)(-)")); // lessen chance of winning
-    orderOfSuccession->push_back(regex("(--)(?:XX)(-)")); // improve chance of winning 10
+    orderOfSuccession->push_back(regex("(--)(?:XX)(-)")); // improve chance of winning  // 10
     orderOfSuccession->push_back(regex("(-)(?:XX)(--)")); // improve chance of winning
-    orderOfSuccession->push_back(regex("(--)(?:OO)(-)")); // again with loss // matching 5
-    orderOfSuccession->push_back(regex("(-)(?:OO)(--)")); // again with loss // matching 5
+    orderOfSuccession->push_back(regex("(--)(?:OO)(-)")); // again with loss // matching 5 // 12
+    orderOfSuccession->push_back(regex("(-)(?:OO)(--)")); // again with loss // matching 5 // 13
+    orderOfSuccession->push_back(regex("(--)(?:XX)")); // improve chance of winning
+    orderOfSuccession->push_back(regex("(?:XX)(--)")); // improve chance of winning // 15
+    orderOfSuccession->push_back(regex("(--)(?:OO)")); //
+    orderOfSuccession->push_back(regex("(?:OO)(--)")); //
     orderOfSuccession->push_back(regex("(--)(?:X)(--)")); // improve chance of winning
-    orderOfSuccession->push_back(regex("(--)(?:O)(--)")); // this is a dangerous situation 15
-    orderOfSuccession->push_back(regex("(-)(?:XX)")); // improve chance of winning
-    orderOfSuccession->push_back(regex("(?:XX)(-)")); // improve chance of winning
-    orderOfSuccession->push_back(regex("(?:X)(-)(?:X)")); // improve chance of winning
-    orderOfSuccession->push_back(regex("(-)(?:OO)")); //
-    orderOfSuccession->push_back(regex("(?:OO)(-)")); //
-    orderOfSuccession->push_back(regex("(?:O)(-)(?:O)"));
-    orderOfSuccession->push_back(regex("(-)(?:X)"));
-    orderOfSuccession->push_back(regex("(?:X)(-)"));
-    orderOfSuccession->push_back(regex("(-)(?:O)"));
-    orderOfSuccession->push_back(regex("(?:O)(-)"));
+    orderOfSuccession->push_back(regex("(--)(?:O)(--)")); // this is a dangerous situation
+    orderOfSuccession->push_back(regex("(---)(?:X)")); // 20
+    orderOfSuccession->push_back(regex("(?:X)(---)"));
+    orderOfSuccession->push_back(regex("(---)(?:O)"));
+    orderOfSuccession->push_back(regex("(?:O)(---)"));
 
     vector<regex> *minOrderOfSuccession = new vector<regex>();
     minOrderOfSuccession->push_back((*orderOfSuccession)[4]);
@@ -71,18 +69,17 @@ int main(int argc, char *argv[])
     minOrderOfSuccession->push_back((*orderOfSuccession)[11]);
     minOrderOfSuccession->push_back((*orderOfSuccession)[12]);
     minOrderOfSuccession->push_back((*orderOfSuccession)[13]);
-    minOrderOfSuccession->push_back((*orderOfSuccession)[15]);
-    minOrderOfSuccession->push_back((*orderOfSuccession)[14]);
-    minOrderOfSuccession->push_back((*orderOfSuccession)[19]);
-    minOrderOfSuccession->push_back((*orderOfSuccession)[20]);
-    minOrderOfSuccession->push_back((*orderOfSuccession)[21]);
     minOrderOfSuccession->push_back((*orderOfSuccession)[16]);
     minOrderOfSuccession->push_back((*orderOfSuccession)[17]);
+    minOrderOfSuccession->push_back((*orderOfSuccession)[14]);
+    minOrderOfSuccession->push_back((*orderOfSuccession)[15]);
+    minOrderOfSuccession->push_back((*orderOfSuccession)[19]);
     minOrderOfSuccession->push_back((*orderOfSuccession)[18]);
-    minOrderOfSuccession->push_back((*orderOfSuccession)[24]);
-    minOrderOfSuccession->push_back((*orderOfSuccession)[25]);
     minOrderOfSuccession->push_back((*orderOfSuccession)[22]);
     minOrderOfSuccession->push_back((*orderOfSuccession)[23]);
+    minOrderOfSuccession->push_back((*orderOfSuccession)[20]);
+    minOrderOfSuccession->push_back((*orderOfSuccession)[21]);
+
 
     // otherwise move is random
     while(!game->isOver()) {
