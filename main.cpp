@@ -43,8 +43,10 @@ int main(int argc, char *argv[])
     orderOfSuccession->push_back(regex("(-)(?:OO)(--)")); // again with loss // matching 5 // 13
     orderOfSuccession->push_back(regex("(--)(?:XX)")); // improve chance of winning
     orderOfSuccession->push_back(regex("(?:XX)(--)")); // improve chance of winning // 15
+    orderOfSuccession->push_back(regex("(-)(?:XX)(-)")); // improve chance of winning
     orderOfSuccession->push_back(regex("(--)(?:OO)")); //
     orderOfSuccession->push_back(regex("(?:OO)(--)")); //
+    orderOfSuccession->push_back(regex("(-)(?:OO)(-)")); // improve chance of losing
     orderOfSuccession->push_back(regex("(--)(?:X)(--)")); // improve chance of winning
     orderOfSuccession->push_back(regex("(--)(?:O)(--)")); // this is a dangerous situation
     orderOfSuccession->push_back(regex("(---)(?:X)")); // 20

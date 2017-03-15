@@ -19,12 +19,12 @@ class state {
 public:
     class greater_comp {
     public:
-        bool operator() (state* a, state* b) { return a->getValue() >= b->getValue();}
+        bool operator() (state* a, state* b) { return a->getValue() <= b->getValue();}
     };
 
     class less_comp {
     public:
-        bool operator() (state* a, state* b) { return a->getValue() <= b->getValue();}
+        bool operator() (state* a, state* b) { return a->getValue() >= b->getValue();}
     };
 private:
     int d;                                      // board dimension
@@ -163,11 +163,13 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                 dashes.push_back(matcher[0].str().find("-"));
                 pos = size_t(matcher.prefix().length());
                 state *successor_state = new state(this->board, this->charsRemaining, this->d);
+                string matched = matcher[0].str();
                 if (matcher[0].str().length() == 5) {
                     successor_state->setValue(isMax ? 1.5 : -1.5); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
                     // there's always a dash in 0
                     // if there's a dash in 1 and 3
                     if (matcher[0].str()[1] == '-' && matcher[0].str()[3] == '-'){
+                        pos += 1; // RANDOM MAYBE 1 or 3
                         successor_state->setValue(isMax ? .75 : -.75); // WHATEVER THE VALUE FOR 2 WITH A PROBABILITY FOR MORE
                         // 2 in a row --X-- but chance to do damage
                         // Choose random?
@@ -175,17 +177,20 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                     else if (matcher[0].str()[2] == '-') {
                         // X: -X-X- 3 in a row!
                         // O: -O-O-
+                        pos += 2;
                     } else if (matcher[0].str()[3] == '-' ) {
                         // -XX-- or -OO-- 3 in a row!
+                        pos += 3;
                     } else { // [1] == '-'
+                        pos += 1;
                         // --XX- 3 in a row!
                     }
                 }
                 else if (matcher[0].str().length() == 4) {
-                    size_t dash2 = matcher[0].str().find("-", dashes[0]);
+                    size_t dash2 = matcher[0].str().find("-", dashes[0]+1);
                     successor_state->setValue(isMax ? 1 : -1); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4 BUT NOT MATCH 5
                     if (dash2 == 1) {
-                        size_t dash3 = matcher[0].str().find("-", dash2);
+                        size_t dash3 = matcher[0].str().find("-", dash2+1);
                         if (dash3 == string::npos) {
                             // X: --XX
                             // O: --OO
@@ -229,6 +234,7 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                 pos = size_t(matcher2.prefix().length());
                 // this means a column i has a killer move and row pos
                 state *successor_state = new state(this->board, this->charsRemaining, this->d);
+                string matched = matcher2[0].str();
                 if (matcher2[0].str().length() == 5) {
                     successor_state->setValue(isMax ? 1.5 : -1.5); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
                     // there's always a dash in 0
@@ -237,21 +243,25 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                         successor_state->setValue(isMax ? .75 : -.75); // WHATEVER THE VALUE FOR 2 WITH A PROBABILITY FOR MORE
                         // 2 in a row --X-- but chance to do damage
                         // Choose random?
+                        pos += 1;
                     }
                     else if (matcher2[0].str()[2] == '-') {
                         // X: -X-X- 3 in a row!
                         // O: -O-O-
+                        pos += 2;
                     } else if (matcher2[0].str()[3] == '-' ) {
                         // -XX-- or -OO-- 3 in a row!
+                        pos += 3;
                     } else { // [1] == '-'
                         // --XX- 3 in a row!
+                        pos += 1;
                     }
                 }
                 else if (matcher2[0].str().length() == 4) {
-                    size_t dash2 = matcher2[0].str().find("-", dashes[0]);
+                    size_t dash2 = matcher2[0].str().find("-", dashes[0]+1);
                     successor_state->setValue(isMax ? 1 : -1); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4 BUT NOT MATCH 5
                     if (dash2 == 1) {
-                        size_t dash3 = matcher2[0].str().find("-", dash2);
+                        size_t dash3 = matcher2[0].str().find("-", dash2+1);
                         if (dash3 == string::npos) {
                             // X: --XX
                             // O: --OO
