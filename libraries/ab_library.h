@@ -51,11 +51,11 @@ private :
     // the actual search begins here!
     action ab_search(state* s) {
         this->startTime = chrono::high_resolution_clock::now(); // actually evaluate beginning time
-        this->MAX_DEPTH = 5;
+        this->MAX_DEPTH = 1;
         value val(0.0, s);
         chrono::microseconds cycle_duration = chrono::microseconds(0);
         chrono::microseconds total_duration = chrono::microseconds(0);
-        while(MAX_DEPTH < 100 && (cycle_duration + total_duration < timeLimit) ) {
+        while(MAX_DEPTH < 9 && (cycle_duration + total_duration < timeLimit) ) {
             int depth = 1;
             total_duration += cycle_duration;
             auto cycle_time = chrono::high_resolution_clock::now(); // actually evaluate beginning time
