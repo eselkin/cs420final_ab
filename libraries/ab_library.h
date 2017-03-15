@@ -56,7 +56,7 @@ private :
         int best_depth = 0;
         chrono::microseconds cycle_duration = chrono::microseconds(0);
         chrono::microseconds total_duration = chrono::microseconds(0);
-        while(MAX_DEPTH < 20 && (cycle_duration + total_duration < timeLimit) ) {
+        while(MAX_DEPTH < 50 && (cycle_duration + total_duration < timeLimit) ) {
             int depth = 1;
             total_duration += cycle_duration;
             auto cycle_time = chrono::high_resolution_clock::now(); // actually evaluate beginning time
