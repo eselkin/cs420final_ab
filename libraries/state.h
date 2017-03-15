@@ -169,7 +169,7 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                     // there's always a dash in 0
                     // if there's a dash in 1 and 3
                     if (matcher[0].str()[1] == '-' && matcher[0].str()[3] == '-'){
-                        pos += 1; // RANDOM MAYBE 1 or 3
+                        pos += rand()%1? 1:3; // RANDOM MAYBE 1 or 3
                         successor_state->setValue(isMax ? .75 : -.75); // WHATEVER THE VALUE FOR 2 WITH A PROBABILITY FOR MORE
                         // 2 in a row --X-- but chance to do damage
                         // Choose random?
@@ -191,28 +191,24 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                         cout << matcher[0] << endl;
                     }
                     size_t dash2 = matcher[0].str().find("-", dashes[0]+1);
-                    successor_state->setValue(isMax ? .75 : -.75); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4 BUT NOT MATCH 5
+                    successor_state->setValue(isMax ? 1.5 : -2); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4 BUT NOT MATCH 5
                     if (dash2 == 1) {
                         size_t dash3 = matcher[0].str().find("-", dash2+1);
                         if (dash3 == string::npos) {
                             // X: --XX
                             // O: --OO
                             pos += dash2;
-                            if (i == 1 && pos == 1) {
-                                cout << "ERROR?" << endl;
-                            }
                         } else {
                             // X: ---X // low priority
                             // O: ---O
                             pos += dash3;
                             successor_state->setValue(isMax ? .25 : -.25);
-                            cout << "HERE IN 25, " << matcher[0] << " pos: "<< pos << endl;
                         }
                     } else {
                         if (dash2 == string::npos) { // reset value here! FOR KILLER
                             // This is a killer or must blocK move!
                             // X: -XXX or XXX- X-XX or O: -OOO -OOO or O-OO or OO-O
-                            successor_state->setValue(isMax ? 3 : -5);
+                            successor_state->setValue(isMax ? 6.5 : -8);
                         } else if (dash2 == 2) {
                             cout << "HERE IN 25, " << matcher[0] << " pos: "<< pos + dashes[0]  << endl;
                             successor_state->setValue(isMax ? .25 : -.25);
@@ -249,7 +245,7 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                         successor_state->setValue(isMax ? .75 : -.75); // WHATEVER THE VALUE FOR 2 WITH A PROBABILITY FOR MORE
                         // 2 in a row --X-- but chance to do damage
                         // Choose random?
-                        pos += 1;
+                        pos += rand()%1? 1:3;
                     }
                     else if (matcher2[0].str()[2] == '-') {
                         // X: -X-X- 3 in a row!
@@ -265,7 +261,7 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                 }
                 else if (matcher2[0].str().length() == 4) {
                     size_t dash2 = matcher2[0].str().find("-", dashes[0]+1);
-                    successor_state->setValue(isMax ? 1 : -1); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4 BUT NOT MATCH 5
+                    successor_state->setValue(isMax ? 1.5 : -2); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4 BUT NOT MATCH 5
                     if (dash2 == 1) {
                         size_t dash3 = matcher2[0].str().find("-", dash2+1);
                         if (dash3 == string::npos) {
@@ -275,7 +271,7 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                         } else {
                             // X: ---X // low priority
                             // O: ---O
-                            pos += dash3;
+                            pos += rand()%1? dash2 : dash3;
                             successor_state->setValue(isMax ? .25 : -.25);
                             cout << "HERE IN 25" << endl;
                         }
@@ -283,7 +279,7 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                         if (dash2 == string::npos) { // reset value here! FOR KILLER
                             // This is a killer or must blocK move!
                             // X: -XXX or XXX- X-XX or O: -OOO -OOO or O-OO or OO-O
-                            successor_state->setValue(isMax ? 3 : -5);
+                            successor_state->setValue(isMax ? 6.5 : -8);
                         }
                         else if (dash2 == 2) {
                             cout << "HERE IN 25, " << matcher2[0] << " pos: "<< pos + dashes[0]  << endl;
@@ -336,7 +332,7 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
     } else if (pq->empty()) { // if there was nothing else on the board then push back a random
         state *random_successor = new state(this->board, this->charsRemaining, this->d);
         cout << "RANDOM" << endl << *random_successor << endl;
-        while (!random_successor->makeMove((char) ('A'+((rand() % (this->d-6))+4)), (rand() % (this->d-6))+4, typeChar));
+        while (!random_successor->makeMove((char) ('A'+((rand() % (this->d-7))+3)), (rand() % (this->d-6))+3, typeChar));
         random_successor->setValue(isMax? 0.15 : -0.15);
         pq->push(random_successor);
     }
