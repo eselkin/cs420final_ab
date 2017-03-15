@@ -26,7 +26,7 @@ void prompt(string dialog, T& outputTo) {
 action* validate(string move, state* s, int dim) {
     stringstream regexString;
     regexString << "^([A-" << char('A'+dim-1) << "]{1})([1-" << dim << "]{1})$";
-    regex moveRegex(regexString.str());
+    regex moveRegex(regexString.str(), regex::icase);
     smatch moveMatch;
     if (regex_search(move, moveMatch, moveRegex)) {
         action* act = new pair<char, int>(toupper(moveMatch[1].str()[0]), atoi(moveMatch[2].str().c_str()));

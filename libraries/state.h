@@ -294,6 +294,7 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                 successor_state->makeMove((char) (pos + 'A'), i+1, typeChar);
                 if (board_of_states[pos][i] != NULL) {
                     board_of_states[pos][i]->setValue(board_of_states[pos][i]->getValue() + successor_state->getValue());
+
                 } else {
                     board_of_states[pos][i] = successor_state;
                 }
