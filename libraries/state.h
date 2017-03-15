@@ -195,13 +195,16 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                             // O: ---O
                             pos += dash3;
                             successor_state->setValue(isMax ? .25 : -.25);
-                            cout << "HERE IN 25" << endl;
+                            cout << "HERE IN 25, " << matcher[0] << " pos: "<< pos << endl;
                         }
                     } else {
                         if (dash2 == string::npos) { // reset value here! FOR KILLER
                             // This is a killer or must blocK move!
                             // X: -XXX or XXX- X-XX or O: -OOO -OOO or O-OO or OO-O
                             successor_state->setValue(isMax ? 5 : -5);
+                        } else if (dash2 == 2) {
+                            cout << "HERE IN 25, " << matcher[0] << " pos: "<< pos + dashes[0]  << endl;
+                            successor_state->setValue(isMax ? .25 : -.25);
                         }
                         // Don't reset for this
                         // X: XX-- // dash2 == 3
@@ -265,6 +268,10 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                             // This is a killer or must blocK move!
                             // X: -XXX or XXX- X-XX or O: -OOO -OOO or O-OO or OO-O
                             successor_state->setValue(isMax ? 5 : -5);
+                        }
+                        else if (dash2 == 2) {
+                            cout << "HERE IN 25, " << matcher2[0] << " pos: "<< pos + dashes[0]  << endl;
+                            successor_state->setValue(isMax ? .25 : -.25);
                         }
                         // Don't reset for this
                         // X: XX-- // dash2 == 3
