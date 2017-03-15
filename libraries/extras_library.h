@@ -36,4 +36,12 @@ action* validate(string move, state* s, int dim) {
     return nullptr;
 }
 
+void gameWon(){
+    cout << "Congratulations you won!!! :)" << endl;
+}
+
+void gameLoss(){
+    cout << "Sorry you lost :(" << endl;
+}
+
 #endif //EXTRAS_LIBRARY_H

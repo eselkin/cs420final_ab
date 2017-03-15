@@ -50,6 +50,7 @@ public:
     bool makeMove(char r, int c, char typeChar);// success|failure
     action getActionTakenToGetHere();
     bool isOver();
+    int checkWinOrLoss();
     priority_queue<state*, vector<state*>, greater_comp>& getOrderedSuccessorsMax(vector<regex> orderOfSuccession);
     priority_queue<state*, vector<state*>, less_comp>& getOrderedSuccessorsMin(vector<regex> orderOfSuccession);
 
@@ -369,8 +370,31 @@ int chooseClosestToChar(string matched, vector<size_t> dash_positions) {
     }
 }
 
+//return 1 for win, 2 for loss, 0 for neither
+int state::checkWinOrLoss() {
+    int win = 1, loss = 2, keepPlaying = 0;
+    regex wonO = regex("OOOO");
+    regex wonX = regex("XXXX");
+    char **transpose_board = transpose(this->board, this->d);
+    smatch matcher;
+    for (int i = 0; i < d; i++) {
+        string transposeRow = getStringFromRow(transpose_board[i]);
+        string row = getStringFromRow(this->board[i]);
+        string rowTemp(row);
+        string rowTempTranspose(transposeRow);
+        if (regex_search(rowTemp, matcher, wonO) || regex_search(rowTempTranspose, matcher, wonO)) {
+            return win;
+        }
+        else if (regex_search(rowTemp, matcher, wonX) || regex_search(rowTempTranspose, matcher, wonX)) {
+            return loss;
+        }
+    }
+    return keepPlaying;
+}
+
 // TODO XXX!!!!!
-priority_queue<state*, vector<state*>, state::greater_comp>& state::getOrderedSuccessorsMax(vector<regex> orderOfSuccession) {
+priority_queue<state*, vector<state*>, state::greater_comp>&
+state::getOrderedSuccessorsMax(vector<regex> orderOfSuccession) {
     this->successorsMax = new priority_queue<state*, vector<state*>, state::greater_comp>();
     this->operateOrderOfSuccession(orderOfSuccession, this->successorsMax, true, 'X');
 

@@ -8,6 +8,9 @@
 
 using namespace std;
 typedef pair<char, int> action;
+
+bool checkWinOrLoss(state *pState);
+
 #define BOARD_SIZE 8
 
 int main(int argc, char *argv[])
@@ -99,6 +102,14 @@ int main(int argc, char *argv[])
             cout << "Computer played: " << a_b_searchClass->getBestAction().first
                  << a_b_searchClass->getBestAction().second
                  << endl;
+        }
+        int winLoss = game->checkWinOrLoss();
+        if(winLoss == 1){
+            gameWon();
+            break;
+        } else if(winLoss == 2){
+            gameLoss();
+            break;
         }
         humanFirst = !humanFirst;
     }
