@@ -53,15 +53,20 @@ private :
         this->startTime = chrono::high_resolution_clock::now(); // actually evaluate beginning time
         this->MAX_DEPTH = 1;
         value val(0.0, s);
+        int best_depth = 0;
         chrono::microseconds cycle_duration = chrono::microseconds(0);
         chrono::microseconds total_duration = chrono::microseconds(0);
-        while(MAX_DEPTH < 9 && (cycle_duration + total_duration < timeLimit) ) {
+        while(MAX_DEPTH < 20 && (cycle_duration + total_duration < timeLimit) ) {
             int depth = 1;
             total_duration += cycle_duration;
             auto cycle_time = chrono::high_resolution_clock::now(); // actually evaluate beginning time
             value alpha(numeric_limits<double>::lowest(), nullptr);
             value beta(numeric_limits<double>::max(), nullptr);
-            val = max_value(s, alpha, beta, depth);
+            value val_temp = max_value(s, alpha, beta, depth);
+            if (depth > best_depth) {
+                best_depth = depth;
+                val = val_temp;
+            }
             cycle_duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now()-cycle_time);
             MAX_DEPTH++;
         }
