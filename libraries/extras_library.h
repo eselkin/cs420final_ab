@@ -36,12 +36,14 @@ action* validate(string move, state* s, int dim) {
     return nullptr;
 }
 
-void gameWon(){
-    cout << "Congratulations you won!!! :)" << endl;
-}
-
-void gameLoss(){
-    cout << "Sorry you lost :(" << endl;
+void endGame(int status){
+    if(status == 1){
+        cout << "Congratulations you won!!! :)" << endl;
+    } else if(status == 2){
+        cout << "Sorry you lost :(" << endl;
+    } else if(status == 3){
+        cout << "Game is a draw! No more moves left" << endl;
+    }
 }
 
 void gameTied() {

@@ -50,8 +50,8 @@ public:
     bool makeMove(char r, int c, char typeChar);// success|failure
     action getActionTakenToGetHere();
     bool isOver();
-    int checkWinOrLoss();
     int getCharsRemaining();
+    int checkEndGameStatus();
     priority_queue<state*, vector<state*>, greater_comp>& getOrderedSuccessorsMax(vector<regex> orderOfSuccession);
     priority_queue<state*, vector<state*>, less_comp>& getOrderedSuccessorsMin(vector<regex> orderOfSuccession);
 
@@ -468,11 +468,12 @@ int chooseClosestToChar(string matched, vector<size_t> dash_positions) {
     }
 }
 
-//return 1 for win, 2 for loss, 0 for neither
-int state::checkWinOrLoss() {
-    int win = 1, loss = 2, keepPlaying = 0;
+//return 1 for win, 2 for loss, 3 for tie 0 for neither
+int state::checkEndGameStatus() {
+    int win = 1, loss = 2, draw = 3, keepPlaying = 0;
     regex wonO = regex("OOOO");
     regex wonX = regex("XXXX");
+    if (this->charsRemaining == 0) return draw;
     char **transpose_board = transpose(this->board, this->d);
     smatch matcher;
     for (int i = 0; i < d; i++) {

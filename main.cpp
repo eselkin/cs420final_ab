@@ -103,19 +103,12 @@ int main(int argc, char *argv[])
                  << a_b_searchClass->getBestAction().second
                  << endl;
         }
-        int winLoss = game->checkWinOrLoss();
-        if(winLoss == 1){
-            gameWon();
-            break;
-        } else if(winLoss == 2){
-            gameLoss();
+        int gameStatus = game->checkEndGameStatus();
+        if(gameStatus > 0){
+            endGame(gameStatus);
             break;
         }
-        if (game->getCharsRemaining() == 0) {
-            gameTied();
-            break;
-        }
-        humanFirst = !humanFirst;
+        humanFirst  = !humanFirst;
     }
     return 0;
 }
