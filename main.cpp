@@ -111,6 +111,10 @@ int main(int argc, char *argv[])
             gameLoss();
             break;
         }
+        if (game->getCharsRemaining() == 0) {
+            gameTied();
+            break;
+        }
         humanFirst = !humanFirst;
     }
     return 0;

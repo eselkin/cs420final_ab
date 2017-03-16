@@ -44,4 +44,8 @@ void gameLoss(){
     cout << "Sorry you lost :(" << endl;
 }
 
+void gameTied() {
+    cout << "Tied game!" << endl;
+}
+
 #endif //EXTRAS_LIBRARY_H
