@@ -188,7 +188,7 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                         // O: -O-O-
                         pos += 2;
                         state* successor_state = new state(this->board, this->charsRemaining, this->d);
-                        successor_state->setValue(isMax ? 4 : -4); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
+                        successor_state->setValue(isMax ? 3 : -3); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
                         successor_state->makeMove((char)(i+'A'), pos+1, typeChar);
                         successor_states.push_back(successor_state);
                     } else if (matcher[0].str()[3] == '-' ) {
@@ -253,6 +253,7 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                             successor_state->makeMove((char)(i+'A'), pos+1, typeChar);
                             successor_states.push_back(successor_state);
                         } else {
+                            // -OO-
                             pos += dashes[0];
                             state* successor_state = new state(this->board, this->charsRemaining, this->d);
                             successor_state->setValue(isMax ? 1 : -1.5); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
@@ -312,7 +313,7 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                         // O: -O-O-
                         pos += 2;
                         state* successor_state = new state(this->board, this->charsRemaining, this->d);
-                        successor_state->setValue(isMax ? 4 : -4); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
+                        successor_state->setValue(isMax ? 3 : -3); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
                         successor_state->makeMove((char)(pos+'A'), i+1, typeChar);
                         successor_states.push_back(successor_state);
                     } else if (matcher2[0].str()[3] == '-' ) {
