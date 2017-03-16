@@ -194,23 +194,23 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                     } else if (matcher[0].str()[3] == '-' ) {
                         // -XX-- or -OO-- 3 in a row!
                         state* successor_state = new state(this->board, this->charsRemaining, this->d);
-                        successor_state->setValue(isMax ? 1.5 : -1.5); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
+                        successor_state->setValue(isMax ? 2. : -2.); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
                         successor_state->makeMove((char)(i+'A'), pos+1, typeChar);
                         successor_states.push_back(successor_state);
                         pos += 3;
                         successor_state = new state(this->board, this->charsRemaining, this->d);
-                        successor_state->setValue(isMax ? 1.25 : -1.25); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
+                        successor_state->setValue(isMax ? 2. : -2.); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
                         successor_state->makeMove((char)(i+'A'), pos+1, typeChar);
                         successor_states.push_back(successor_state);
                     } else { // [1] == '-'
                         pos += 1;
                         state* successor_state = new state(this->board, this->charsRemaining, this->d);
-                        successor_state->setValue(isMax ? 1.5 : -1.5); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
+                        successor_state->setValue(isMax ? 2. : -2.); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
                         successor_state->makeMove((char)(i+'A'), pos+1, typeChar);
                         successor_states.push_back(successor_state);
                         pos += 3;
                         successor_state = new state(this->board, this->charsRemaining, this->d);
-                        successor_state->setValue(isMax ? 1.5 : -1.5); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
+                        successor_state->setValue(isMax ? 2. : -2.); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
                         successor_state->makeMove((char)(i+'A'), pos+1, typeChar);
                         successor_states.push_back(successor_state);
                         // --XX- 3 in a row!
@@ -297,12 +297,12 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                     if (matcher2[0].str()[1] == '-' && matcher2[0].str()[3] == '-'){
                         pos +=1;
                         state* successor_state = new state(this->board, this->charsRemaining, this->d);
-                        successor_state->setValue(isMax ? 1.5 : -1.5); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
+                        successor_state->setValue(isMax ? 2 : -2); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
                         successor_state->makeMove((char)(pos+'A'), i+1, typeChar);
                         successor_states.push_back(successor_state);
                         pos += 2;
                         successor_state = new state(this->board, this->charsRemaining, this->d);
-                        successor_state->setValue(isMax ? 1.5 : -1.5); // WHATEVER THE VALUE FOR 2 WITH A PROBABILITY FOR MORE
+                        successor_state->setValue(isMax ? 2 : -2); // WHATEVER THE VALUE FOR 2 WITH A PROBABILITY FOR MORE
                         successor_state->makeMove((char)(pos+'A'), i+1, typeChar);
                         successor_states.push_back(successor_state);
                         // 2 in a row --X-- but chance to do damage
@@ -319,23 +319,23 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                     } else if (matcher2[0].str()[3] == '-' ) {
                         // -XX-- or -OO-- 3 in a row!
                         state* successor_state = new state(this->board, this->charsRemaining, this->d);
-                        successor_state->setValue(isMax ? 1.5 : -1.5); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
+                        successor_state->setValue(isMax ? 2. : -2.); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
                         successor_state->makeMove((char)(pos+'A'), i+1, typeChar);
                         successor_states.push_back(successor_state);
                         pos += 3;
                         successor_state = new state(this->board, this->charsRemaining, this->d);
-                        successor_state->setValue(isMax ? 1.5 : -1.5); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
+                        successor_state->setValue(isMax ? 2. : -2.); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
                         successor_state->makeMove((char)(pos+'A'), i+1, typeChar);
                         successor_states.push_back(successor_state);
                     } else { // [1] == '-'
                         pos += 1;
                         state* successor_state = new state(this->board, this->charsRemaining, this->d);
-                        successor_state->setValue(isMax ? 1.5 : -1.5); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
+                        successor_state->setValue(isMax ? 2. : -2.); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
                         successor_state->makeMove((char)(pos+'A'), i+1, typeChar);
                         successor_states.push_back(successor_state);
                         pos += 3;
                         successor_state = new state(this->board, this->charsRemaining, this->d);
-                        successor_state->setValue(isMax ? 1.5 : -1.5); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
+                        successor_state->setValue(isMax ? 2. : -2.); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
                         successor_state->makeMove((char)(pos+'A'), i+1, typeChar);
                         successor_states.push_back(successor_state);
                         // --XX- 3 in a row!
@@ -358,7 +358,7 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                             // O: ---O
                             pos += dash3;
                             state* successor_state = new state(this->board, this->charsRemaining, this->d);
-                            successor_state->setValue(isMax ? .5 : -.5); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
+                            successor_state->setValue(isMax ? 1 : -1); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
                             successor_state->makeMove((char)(pos+'A'), i+1, typeChar);
                             successor_states.push_back(successor_state);
                         }
@@ -374,10 +374,12 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                         } else if (dash2 == 2) {
                             pos += dashes[0];
                             state* successor_state = new state(this->board, this->charsRemaining, this->d);
-                            successor_state->setValue(isMax ? .5 : -.5); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
+                            successor_state->setValue(isMax ? 1 : -1); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
                             successor_state->makeMove((char)(pos+'A'), i+1, typeChar);
                             successor_states.push_back(successor_state);
                         } else {
+                            // X: XX-- // dash2 == 3
+                            // O: OO-- // dash2 == 3
                             pos += dashes[0];
                             state* successor_state = new state(this->board, this->charsRemaining, this->d);
                             successor_state->setValue(isMax ? 1. : -1.5); // WHATEVER THE VALUE FOR 3 IN A ROW WITH A CHANCE FOR 4
@@ -390,11 +392,6 @@ void state::operateOrderOfSuccession(vector<regex> orderOfSuccession, priority_q
                             successor_states.push_back(successor_state);
 
                         }
-                        // Don't reset for this
-                        // X: XX-- // dash2 == 3
-                        // O: OO-- // dash2 == 3
-                        // X: X---
-                        // O: O---
                     }
                 }
                 for (state* successor : successor_states) {
